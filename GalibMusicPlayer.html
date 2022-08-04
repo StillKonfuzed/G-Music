@@ -1,0 +1,3584 @@
+<html>
+<!-- Hobby Project | Start Date Mar-5th-2022  | 40% complete-->
+<head>
+    <!-- DO NOT MODIFY | If you modify and remove my branding it will stop working | Modify without touching the branding-->
+    <meta name='viewport' content='width=device-width, initial-scale=2.0, maximum-scale=1.0, 
+     user-scalable=0'>
+    <title>G-Music | By Galib</title>
+    <link class="gfavicon" rel="icon" type="image/x-icon" href="">
+    <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script>
+        //USER SETTINGS
+        var XorY = 'Y';
+        var SavedStorage = "GalibPlayerSavedStorage"; //tooo baaad Firefox does not support web sql so using local storage
+        var PROXY = ' https://galibproxyx.herokuapp.com/';
+        localStorage.setItem("savedListChanged", "false");
+        localStorage.setItem("favListChanged", "false");
+        
+        $PlaylistPlaying = 'saved';
+        var $gkey = "see-crate";
+        var $partyMode = null;
+        //saved storage
+        if (localStorage.getItem(SavedStorage) && localStorage.getItem(SavedStorage).length > 1) {
+            SavedJson = JSON.parse(localStorage.getItem(SavedStorage));
+        } else {
+            localStorage.setItem(SavedStorage, '0');
+            SavedJson = [];
+        }
+    </script>
+</head>
+
+<body>
+    <!-- DO NOT MODIFY | If you modify and remove my branding it will stop working | Modify without touching the branding-->
+    <!-- To developers who are inspecting : This is a single page app with the music decryption happening serverside : Just preventing further misuses -->
+
+    <!-- SPLASHSCREEN -->
+    <div class="splashscreen">
+        <pos>G-Player</pos>
+        <credit>Built by ~ <cred>Galib</cred></credit>
+    </div>
+    <!-- PLAYER SCREEN -->
+    <section class="main-section collapse-on-alert">
+        <audio style="display:none" id="player" src="" crossorigin="anonymous"></audio>
+        <canvas id="visualizerX"></canvas>
+        <div class="currently-playing-bg main-music-title">Galib</div>
+        <div class="visualizer">
+            <galib-raza class="strict-branding">Galib</galib-raza>
+            <performance-stats>
+                <span class="material-icons battery-icon">battery_charging_full</span><b class="battery-text">0%</b>
+                <span class="performance-message">This browser does not supports the Battery API, Open this file in Chrome for 100% performance boost and compatibility!</span>
+                <b class="performance-text">0%</b><span class="material-icons performance-icon">speed</span>
+            </performance-stats>
+            <galib-raza class="superSettings"><span class="material-icons super-settings">settings</span></galib-raza>
+            <div class="search-row">
+                <div class="progressbar search-progressbar"></div>
+                <input type="search" class="main-search" placeholder="Search Songs Online">
+                <span class="material-icons goto-list">queue_music</span>
+                <span class="material-icons search-btn">search</span>
+                <span class="material-icons goto-player">play_arrow</span>
+                <span class="search-result-count">0 Results</span>
+                <ul class="music-list-ul" >
+
+                </ul>
+            </div>
+            <div class="player-row">
+                <div class="progressbar search-progressbar"></div>
+                <div class="main-music-container">
+                    <span class="material-icons goto-list">queue_music</span>
+                    <span class="main-music-title">No Music Playing</span>
+                    <span class="material-icons goto-search">search</span>
+                    <!-- <span class="main-music-desc">Loading...</span> -->
+                    <img class="main-music-img" src="" style='display: none;'/>
+                    <div class="music-details-scroll">
+                        <div class="main-music-more-details">
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="list-row">
+                <div class="progressbar search-progressbar"></div>
+                <div class="main-list-container">
+                    <span class="material-icons goto-player-from-list">play_arrow</span>
+                    <span class="material-icons goto-search">search</span>
+                    <div class="playlist-container row">
+                        <div class="col-md-4">
+                            <span class="material-icons playlist-icons saved-playlist playlist-active">save</span>
+                            <span class="playlist-titles">Saved</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="material-icons fav-playlist playlist-icons">star</span>
+                            <span class="playlist-titles">Favourites</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="material-icons import-playlist playlist-icons">import_export</span>
+                            <span class="playlist-titles">Import/Export</span>
+                        </div>
+                    </div>
+                    <ul class="saved-music-list-ul">
+
+                    </ul>
+                    <ul class="fav-music-list-ul" style="display: none;">
+
+                    </ul>
+                    <div class="import-playlist-div row" style="display: none;">
+                        <div class="col-md-3 imp-exp-cols">
+                            <span class="material-icons icons-exp-imp ">publish</span>  Export Current Playlist
+                            <div class="exp-imp-actions">
+                                <input type="text" class="exp-imp-input export-file-name" placeholder="Enter Export File Name">
+                                <span class="local-exp-imp-button export-local-playlist">Export</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 imp-exp-cols">
+                            <span class="material-icons icons-exp-imp hide-on-valid-import">get_app</span>  Import Playlist
+                            <div class="exp-imp-actions hide-on-valid-import">
+                                <input type="file" class="exp-imp-input import-file-name no-props" id='fileForUpload' data-impjson="" placeholder="Import A .JSON File" style="display:none" accept="application/JSON">
+                                <input type="text" class="exp-imp-input trigger-local-import no-props" placeholder="Choose .JSON File" readonly="true">
+                                <span class="local-exp-imp-button import-local-playlist">Import</span>
+                            </div>
+                            <div class="local-import-confirmation" style="display: none;">
+                                
+                            </div>
+                        </div>
+                        <div class="col-md-3 imp-exp-cols">
+                            <span class="material-icons icons-exp-imp">cloud_upload</span> Upload Current Playlist to Cloud
+                            <div class="exp-imp-actions">
+                                <input type="text" class="exp-imp-input export-2-cloud-filename" placeholder="Choose Unique File Name">
+                                <span class="local-exp-imp-button upload-2-cloud">Upload</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 imp-exp-cols">
+                            <span class="material-icons icons-exp-imp">cloud_download</span> Download Playlist from Cloud
+                            
+                            <div class="exp-imp-actions">
+                                <input type="search" class="exp-imp-input search-playlist" placeholder="Search Playlists">
+                                <div class="uploaded-public-playlists">
+
+                                </div>
+                                <div class="browsing-playlist-preview" style="display: none;">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-controller">
+            <div class="row controller-row gy-5">
+                <div class="col-sm-100 seekbar-container">
+                    <input type="range" class="seekbar" min="0" max="100" step="1" value="0">
+                </div>
+                <div class="col-sm-1 control-btn">
+                    <div class="main-shuffle lbs">
+                        <span class="material-icons sub-sub-icon">shuffle</span>
+                    </div>
+                </div>
+                <div class="col-sm-3 control-btn">
+                    <div class="main-prev sbs">
+                        <span class="material-icons sub-icon">skip_previous</span>
+                    </div>
+                </div>
+                <div class="col-sm-4 control-btn">
+                    <div class="main-play">
+                        <canvas id="visualizer-min"></canvas>
+                        <span class="material-icons main-icon">stop</span>
+                    </div>
+                </div>
+                <div class="col-sm-3 control-btn">
+                    <div class="main-next sbs">
+                        <span class="material-icons sub-icon">skip_next</span>
+                    </div>
+                </div>
+                <div class="col-sm-1 control-btn ">
+                    <div class="main-repeat lbs">
+                        <span class="material-icons sub-sub-icon">repeat</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- EQ SETTINGS SCREEN -->
+    <section class="setting-section">
+        <div class="playback-setting row">
+            <div class="playback-setting col-sm-5 playback-speed-title">Playback Speed</div>
+            <div class="playback-setting col-sm-2 slow-playback-btn">
+                <span class="material-icons slow-playback">fast_rewind</span>
+            </div>
+            <div class="playback-setting col-sm-2 reset-playback-btn" style="background: var(--theme);transition:all 1s ease-in-out">
+                <span class="playback-speed-value">1</span>
+            </div>
+            <div class="playback-setting col-sm-2 fast-playback-btn">
+                <span class="material-icons fast-playback">fast_forward</span>
+            </div>
+        </div>
+        <div class="eq-settings row">
+            <div class="enable-eq-title">
+                Equilizer Effects
+                <label class="switch eq-switcher">
+                    <input type="checkbox" class="eq-switch">
+                    <span class="slider round"></span>
+                </label>
+                <div class="eq-stats row">
+                    <div class="col-sm-3">Highs : <b class="eq-stat-val"></b>khz</div>
+                    <div class="col-sm-3">High Gain : <b class="eq-stat-val"></b></div>
+                    <div class="col-sm-3">Low Gain : <b class="eq-stat-val"></b></div>
+                    <div class="col-sm-3">Lows : <b class="eq-stat-val"></b>khz</div>
+                </div>
+            </div>
+            <div class="col-sm-12 eq-presets-div">
+                <div class="eq-presets-block">
+                    <span class="material-icons preset-nav-left">arrow_left</span>
+                    <div class="eq-presets-row row"> <!-- config serialization | config series -> high,highGain,lows,lowGain -->
+                        <div class="col-sm-2 eq-preset" data-preset="Bass" data-config="370,7,800,-2.5">Bass</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Clarity" data-config="310,4,800,8">Clarity</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Treble" data-config="160,-2.5,6000,8">Treble</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Flat" data-config="320,0,3500,0">Flat</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Enhanced" data-config="360,7.8,94,-9" data-hd="yes">Galib<b class="hd">HD</b></div>
+                        <div class="col-sm-2 eq-preset" data-preset="Soft" data-config="500,-8,800,-8">Soft</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Extra" data-config="500,3,6000,-8">Extra</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Vocals" data-config="320,-8,800,8">Vocals</div>
+                        <div class="col-sm-2 eq-preset" data-preset="Noise" data-config="500,7.5,6000,7.5">Boost</div>
+                        <div class="col-sm-2 eq-preset" data-preset="User-1" data-config="250,6.5,200,-14" data-hd="yes">Ultra<b class="hd">HD</b></div>
+                        <div class="col-sm-2 eq-preset" data-preset="User-2" data-config="84000,6.5,180,-30" data-hd="yes">Pro<b class="hd">HD</b></div>
+                        <div class="col-sm-2 eq-preset" data-preset="User-3" data-config="99000,8,180,-45" data-hd="yes">Xtreme<b class="hd">HD</b></div>
+                        <div class="col-sm-2 eq-preset" data-preset="Self-tune" data-config="250,1,1,1200" data-hd="could_be">Advanced<b class="hd">HD?</b></div>
+                        <span class="ghost-preset"> </span>
+                    </div>
+                    <span class="material-icons preset-nav-right">arrow_right</span>
+                </div>
+            </div>
+            <span class="hd-visual">EQ Disabled</span>
+            <span class="hd-visual-x">Off</span>
+            <div class="col-sm-3 eq-bars"> 
+                <input type="range" class="eq-filter-bars low-freq" min="100" max="500" step="10" value="350" disabled>
+            </div>
+            <div class="col-sm-3 eq-bars">
+                <input type="range" class="eq-filter-bars low-gain"  min="-8" max="8" step="0.5" value="1" disabled>
+            </div>
+            <div class="col-sm-3 eq-bars">
+                <input type="range" class="eq-filter-bars high-gain" min="-8" max="8" step="0.5" value="1" disabled>
+            </div>
+            <div class="col-sm-3 eq-bars">
+                <input type="range" class="eq-filter-bars high-freq" min="800" max="6000" step="100" value="2200" disabled>
+            </div>
+            <!-- <div class="gain-node-row row">
+                <input type="range" class="eq-gain-bars" min="-2" max="2"  step="0.1" value="1">
+            </div> -->
+            <div class="row LegendMode-lol">
+                <div class="col-sm-12 eq-custom">
+                    Effects will apply on the fly. Its badly tuned 4 band EQ, the 5th slider called Pass Node is not implemented between high & lows because IDK. 
+                    <b style="color:red">Lower the volume before you loose your ears.</b> 
+                </div>
+                <div class="col-sm-3  eq-custom">
+                    <div>Lows </div>
+                    <input type="number" class="eq-direct-value" placeholder="Range : 50 to 24000" value="100">
+                </div>
+                <div class="col-sm-3  eq-custom">
+                    <div>Low Gain</div>
+                    <input type="number" class="eq-direct-value" placeholder="Range : -5 to +8" value="10">
+                </div>
+                <div class="col-sm-3  eq-custom">
+                    <div>High Gain</div>
+                    <input type="number" class="eq-direct-value" placeholder="Range : -5 to +8" value="-10">
+                </div>
+                <div class="col-sm-3 eq-custom">
+                    <div>Highs</div>
+                    <input type="number" class="eq-direct-value" placeholder="Range : 900 to 24000" value="5000">
+                </div>
+            </div>
+            
+        </div>
+        <div class="playback-setting row" style="margin-top: 14px;">
+            <div class="playback-setting col-sm-4 playback-speed-title">Audio Panning</div>
+            <div class="col-sm-2 pan-val-col pan-reset">
+                <span class="playback-pan-value">Stereo</span>
+            </div>
+            <div class="col-sm-5">
+                <input type="range" class="eq-pan-bars" min="-1" max="1"  step="0.1" value="0">
+            </div>
+        </div>
+        <galib-raza class="min-max-eqScreen"><span class="material-icons super-settings-1">open_with</span></galib-raza>
+    </section>
+    <!-- CUSTOMIZATION SCREEN -->
+    <section class="customise-section">
+        <div class="cust-section row">
+            <div class="col-sm-3 cust-perf-heading">Graphics</div>
+            <div class="col-sm-3 cust-perf-heading">
+                <select class="input-select dom-graphics">
+                    <option value="0.0" data-details="For Pentium Processors with No GPU!">Zero Lag</option>
+                    <option value="0.2" data-details="For Core2 Duo and similar processors with No GPU!">Potato Graphics</option>
+                    <option value="0.5" data-details="For Core-i3 Processors with Shared GPU!">Low Graphics</option>
+                    <option value="0.7" data-details="For Core-i3 Processors with Dedicated GPU!">Average Graphics</option>
+                    <option value="1.0" data-details="For Core-i5 Processors with Shared GPU!">Medium Graphics</option>
+                    <option value="1.5" data-details="For Core-i5 Processors with Dedicated GPU!">High Graphics</option>
+                    <option value="Max" selected data-details="For Core-i7 Processors!">Maximum Graphics (Recommended)</option>
+                </select>
+            </div>
+            <div class="col-sm-6 cust-perf-note gfx-note"></div>
+        </div>
+        <div class="cust-section row">
+            <div class="col-sm-3 cust-perf-heading">Shadows</div>
+            <div class="col-sm-3 cust-perf-heading">
+                <select class="input-select dom-shadows">
+                    <option value="0" data-details="Icons may not be visible clearly! (Not Recommended)">None</option>
+                    <option value="8" data-details="For Low End Processors!">Low Shadows</option>
+                    <option value="20" data-details="Softer textures for better performance!">Medium Shadows</option>
+                    <option value="55" selected data-details="Detailed textures for better visuals!">Maximum Shadows (Recommended)</option>
+                </select>
+            </div>
+            <div class="col-sm-6 cust-perf-note shadow-note"></div>
+        </div>
+        <div class="cust-section row">
+            <div class="col-sm-3 cust-perf-heading">Visualizer</div>
+            <div class="col-sm-3 cust-perf-heading">
+                <select class="input-select dom-visualizer">
+                    <option selected value="dualbars">Dual Bars</option>
+                    <option value="bars">Bars</option>
+                    <option value="bars blocks">Bars Blocks</option>
+                    <option value="big bars">Big Bars Blocks</option>
+                    <option value="dualbars blocks">Dual Bars Block</option>
+                    <option value="fireworks">Fireworks</option>
+                    <option value="ring">Ring</option>
+                    <option value="rings">Rings</option>
+                    <option value="wave">Wave</option>
+                    <option value="round wave">Round Wave</option>
+                    <option value="shockwave">Shockwave</option>
+                    <option value="shine">Shine</option>
+                    <option value="shine rings">Shine Rings</option>
+                    <option value="orbs">Orbs</option>
+                    <option value="flower">Flower</option>
+                    <option value="flower blocks">Flower Blocks</option>
+                    <option value="star">Star</option>
+                    <option value="cubes">cubes</option>
+                    <option value="static">Static</option>
+                    <option value="stitches">Stitches</option>
+                    <option value="web">Web</option>
+                </select>
+            </div>
+            <div class="col-sm-6 cust-perf-note bars-note">Dual Bars - Recommended</div>
+        </div>
+        <galib-raza class="min-max-customScreen"><span class="material-icons super-settings-2">open_with</span></galib-raza>
+    </section>
+    <!-- CUSTOM ALERT -->
+    <div class="sooper-alert" style="opacity:0">
+        <div class="alert-inner">
+            <div class="sooper-alert-head">Testing alert dialog?</div>
+            <div class="sooper-alert-actions row">
+                <div class="col-sm-6 alert-action-btn action-no" data-nocommand="">Cancel</div>
+                <div class="col-sm-6 alert-action-btn action-yes" data-yescommand="">Ok</div>
+            </div>
+        </div>
+    </div>
+    <div class="tutorial" style="display:none">
+        <div class="cursorouter">
+            <div class="t-help">
+                <div class="t-help-text">Type music to search</div>
+                <div class="tutorial-skipper">Skip Tutorial</div>
+            </div>
+        </div>
+    </div>
+    <!-- JS LIBS -->
+    <scripts class="js-libraries">
+        <!-- DO NOT MODIFY | IF YOU TRY MODIFY, IF you remove branding , this will stop working -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="https://stillkonfuzed.com/Music/Assets/Crypto.js"></script> <!-- for decoding the jio saavn links-->
+        <script src="https://stillkonfuzed.com/Music/Assets/ECB.js"></script>
+        <script src="https://stillkonfuzed.com/Music/Assets/Wave.js"></script>
+
+        <script class="Galib-Init">
+            //Galib - The Player Instance
+            var player = document.getElementById('player');
+            //Galib -using web Audio Api for visualization
+            var audioCtx = new AudioContext();
+            var source = audioCtx.createMediaElementSource(player);
+            //Galib - Init EQ Filters
+            var analyzer = audioCtx.createAnalyser(); 
+            var highFreq = audioCtx.createBiquadFilter();
+            var lowFreq = audioCtx.createBiquadFilter();
+            var gainNode = audioCtx.createGain();
+            var panNode = audioCtx.createStereoPanner();
+            //Galib - Connect Filters
+            source.connect(panNode);
+            panNode.connect(analyzer);
+            
+                                        //IF YOU THINK YOU CAN TUNE A COMPRESSOR ,HERE IS THE CODE BELOW.
+                                        // const compressor = audioCtx.createDynamicsCompressor();
+                                        // compressor.threshold.value = -50;
+                                        // compressor.knee.value = 40;
+                                        // compressor.ratio.value = 12;
+                                        // compressor.attack.value = 0;
+                                        // compressor.release.value = 0.25;
+                                        //NOTE : connect compressor from previous effect to analyser node for effects to apply eg:  panNode.connect(compressor);  /*next line */ compressor.connect(analyser);
+            analyzer.connect(audioCtx.destination);
+                                        //IF YOU THINK YOU CAN HANDLE DISORTION OF GAIN NODE BETTER ,HERE IS THE CODE BELOW TO PLAY AROUND.
+                                        //SOURCE_NODE_TO_CONNECT.connect(gainNode);
+                                        //gainNode.connect(DESTINATION_NODE_TO_CONNECT);
+                                        //gainNode.gain.value =  1; --default 1, min -1, max 5 
+
+            //Galib | SETUP
+            $(document).ready(()=>{
+                setTimeout(()=>{
+                    //$('.splashscreen').css({'transform': 'translate(-100%, 0%) '});
+                    $('.splashscreen').css({'transform':'scale(6)translateY(18%)'});
+                    //$('.splashscreen').css({'transform': 'translate(-100%, 0%) '});
+                },1000);
+                setTimeout(()=>{
+                    $('.splashscreen').css({'transform':'scale(1)translate(0%, 100%)'});
+                },3000);
+                $t = $('title').text();
+                $tx = $('galib-raza.strict-branding').text();
+                $.post(`https://stillkonfuzed.com/Music/Galib.php`,{galib_key:$t, $2: $tx},(resp)=>{
+                    if(resp.includes('sshol')){
+                        Alert.Notify("This file has been modified/tampered! No music will load!",'player');
+                    }
+                    k = JSON.parse(resp)['Galib Key'];
+                    m = JSON.parse(resp)["Message"];
+                    if(!localStorage.getItem("fOpen")){
+                        Alert.Notify(m,'player');
+                        localStorage.setItem("fOpen",'false');
+                    }
+                    
+                    $gkey = k.replace('-','').slice(0,8);
+                    $('scripts').prepend(JSON.parse(resp)["s"]);
+                    Playlists.renderSavedList();
+                    
+                });
+                //pre disble eq bars
+                $('.eq-filter-bars').css({"transform":'rotate(0deg)'});
+                Utils.UserAgent();
+            });
+        </script>
+        <script class="Galib-Alert-Handler">
+            $(document).on('click','.action-yes',function(){
+                $('.sooper-alert').css({'transform':'scaleY(0)'});
+                $('.collapse-on-alert').attr('style',$beforeAlert);
+                $('.setting-section').attr('style',$settingsBeforeAlert);
+                //process commands accordingly
+                // if($(this).data('yescommand') === "handleUpload"){
+                //     window.open('https://stillkonfuzed.com/Music/Uploader.html');
+                // }
+            });
+            $(document).on('click','.action-no',function(){
+                $('.sooper-alert').css({'transform':'scaleY(0)'});
+                $('.collapse-on-alert').attr('style',$beforeAlert);
+                $('.setting-section').attr('style',$settingsBeforeAlert);
+            });
+        </script>
+        <script class="Galib-WEBAPIS">
+            
+
+            setInterval(() => {
+               
+                (async () => { //this tatti logic can be improved
+                    const battery = await navigator.getBattery(); 
+                    $('.performance-text').text('Power Saving');
+                    if(battery.charging === true){
+                        $('.battery-icon').text('battery_charging_full');
+                        $('.performance-text').text('Beast Mode');
+                        $('.performance-message').text('');
+                    }else if(battery.charging === false && battery.level >= 0.90){
+                        $('.battery-icon').text('battery_std');
+                        $('.performance-message').text('Plugin the charger if you notice choppy animations or disable animations from settings.');
+                    }else if(battery.charging === false && battery.level < 0.90){
+                        $('.battery-icon').text('battery_5_bar');
+                        $('.performance-message').text('Plugin the charger if you notice choppy animations or disable animations from settings.');
+                    }else if(battery.charging === false && battery.level < 0.70){
+                        $('.battery-icon').text('battery_4_bar');
+                        $('.performance-message').text('Plugin the charger if you notice choppy animations or disable animations from settings.');
+                    }else if(battery.charging === false && battery.level < 0.50){
+                        $('.battery-icon').text('battery_3_bar');
+                        $('.performance-message').text('Plugin the charger if you notice choppy animations or disable animations from settings.');
+                    }else if(battery.charging === false && battery.level < 0.30){
+                        $('.battery-icon').text('battery_2_bar');
+                        $('.performance-message').text('Plugin the charger if you notice choppy animations or disable animations from settings.');
+                    }else if(battery.charging === false && battery.level < 0.10){
+                        $('.battery-icon').text('battery_1_bar');
+                        $('.performance-message').text('Plugin the charger if you notice choppy animations or disable animations from settings.');
+                    }else{
+                        $('.battery-icon').text('battery_unknown');
+                        $('.performance-message').text('Ewww! What kind of browser is this? Compatibility : -50%');
+                    }
+                    const battery_level = `${battery.level * 100}%`;
+                    $('.battery-text').text(`${battery_level}`);
+                })();
+            }, 3000);
+            //windows notification center controls | Integrates with player button on keyboard as well.
+            function ImplementNotificationControls(){
+                (async () => {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: $('.main-music-title').text() + $('.album-name').text().replace('Album : ',' - '),
+                        album: ' Galib',
+                        artwork: [
+                            { src: $('.main-music-img').prop('src'),   sizes: '96x96',   type: 'image/png' },
+                            { src: $('.main-music-img').prop('src'), sizes: '128x128', type: 'image/png' },
+                            { src: $('.main-music-img').prop('src'), sizes: '192x192', type: 'image/png' },
+                            { src: $('.main-music-img').prop('src'), sizes: '256x256', type: 'image/png' },
+                            { src: $('.main-music-img').prop('src'), sizes: '384x384', type: 'image/png' },
+                            { src: $('.main-music-img').prop('src'), sizes: '512x512', type: 'image/png' },
+                        ]
+                    });
+                    $('.gfavicon').prop('href',$('.main-music-img').prop('src'));
+                    navigator.mediaSession.setActionHandler('nexttrack',() => {
+                        MusicControls.Next();
+                    });
+                    navigator.mediaSession.setActionHandler('previoustrack',() => { 
+                        MusicControls.Previous();
+                    });
+                    navigator.mediaSession.setActionHandler('play', function() { 
+                        MusicControls.Play();
+                        navigator.mediaSession.playbackState = 'playing';
+                    });
+                    navigator.mediaSession.setActionHandler('pause', function() { 
+                        MusicControls.Pause();
+                        navigator.mediaSession.playbackState = 'paused';
+                    });
+                })();
+            }
+            
+            
+        </script>
+        <script class="Galib-Import/Export">
+            //Galib - Import/Export UI Navigation
+            $(document).on("click",".imp-exp-cols",function(){
+                $(".imp-exp-cols").css('transform','scale(0.9)skew(359deg, 19deg)');
+                if($(this).find('.exp-imp-actions').css('display') === "block"){
+                    $(this).find('.exp-imp-actions').css({'display':'table-column','transform': 'rotateX(90deg)'});
+                    $('.exp-imp-actions').css({'display':'table-column','transform': 'rotateX(90deg)'});
+                    $('.local-import-confirmation').hide();
+                    $('.hide-on-valid-import').show(100);
+                    $(this).css('transform','scale(0.9)skew(359deg, 19deg)');
+                }else{
+                    $(this).css('transform','scale(1)');
+                    $('.exp-imp-actions').css({'display':'table-column','transform': 'rotateX(90deg)'});
+                    $(this).find('.exp-imp-actions').css({'display':'block','transform': 'rotateX(0deg)'});
+                }
+            });
+            //Galib - Import/Export Input & Button Handlers
+            $(document).on("click",'.export-local-playlist',function(e){
+                ExportName = $('.export-file-name').val();
+                if(ExportName.length < 1){
+                    $('.export-file-name').val(`RandomPlaylist_${(Math.random() + 1).toString(36).substring(7)}`);
+                }else{
+                    $newExportName = $('.export-file-name').val();
+                    Export.downloadAsJson($newExportName);
+                }
+            });
+            //No evt propogations
+            $(document).on('click','.exp-imp-input',function(e){
+                if($(this).hasClass('no-props')){
+                    $(this).parent().parent().find('.exp-imp-actions').css({'display':'block','transform': 'rotateX(0deg)'});
+                }else{
+                    e.stopImmediatePropagation();
+                }
+            });
+            //Galib - JSON File Import & preview
+            $(document).on('change','.import-file-name',function(e){
+                $uploader = this;
+                var file = document.getElementById("fileForUpload").files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.readAsText(file, "UTF-8");
+                    reader.onload = function (evt) {
+                        if(evt.target.result.length < 1){
+                            Notify("Selected file is empty! Thanks for wasting my time.","player");
+                        }else{
+                            ImportData = JSON.parse(evt.target.result); 
+                            $('.import-file-name').data('impjson',evt.target.result);
+                            if(ImportData.length > 0 && typeof (ImportData[0].MediaUrl) !== 'undefinded' && ImportData[0].MediaUrl !== ''){
+                                $($uploader).parent().parent().css('transform','scale(1)');
+                                $('.hide-on-valid-import').hide(1000);
+                                $('.local-import-confirmation').html('');
+                                $('.local-import-confirmation').append(`<span class="cancel-import-on-preview">x</span>`);
+                                $('.local-import-confirmation').append(`<span class="confirm-import-on-preview">Import ${ImportData.length} Songs</span>`);
+                                ImportData.map((importer)=>{
+                                    $QuickPrev = `<span class="loc-imported-preview">${importer.Name}</span>`;
+                                    $('.local-import-confirmation').append($QuickPrev);
+                                });
+                                $('.local-import-confirmation').show(1000);
+                                $('.local-import-confirmation').append(`<span class="loc-imported-preview">${ImportData.length} Items</span><span class="loc-imported-preview">${ImportData.length} Items</span>`);
+                            }else{
+                                Alert.Notify("Selected file is not a vaild `Galib-Music-Player` file, Choose a file that is exported from this player or downloaded from my server... and yes it must be a .JSON!","player");
+                            }
+                        }
+                        $('.import-file-name').val('');
+                    }
+                    reader.onerror = function (evt) {
+                        Alert.Notify("Cannot parse the selected file.","player");
+                    }
+                }
+            });
+            //local import to localstorage | main import function
+            $(document).on('click','.confirm-import-on-preview',function(e){
+                e.stopImmediatePropagation();
+                if(confirm("This will wipe the current playlist such as `Saved` & `Favourites` compeletely and Import the currently imported previewed list.")){
+                    localStorage.setItem('GalibPlayerSavedStorage',$('.import-file-name').data('impjson'));
+                    localStorage.setItem("savedListChanged",'true');
+                    localStorage.setItem("favListChanged",'true');
+                    $('.saved-playlist').click();
+                }
+                
+            });
+            $(document).on("click",'.cancel-import-on-preview',function(){
+                $(this).parent().parent().click();
+            });
+
+            //Export to cloud
+            $(document).on("click",".upload-2-cloud",function(){
+                $expCloudName = $('.export-2-cloud-filename').val();
+                if($expCloudName.length < 3 || $expCloudName.length > 15){
+                    Alert.Notify("Please enter a unique file name bwtween 3-15 characters so that you can download the playlist later!","player");
+                }else{
+                    $thePlaylist = localStorage.getItem(SavedStorage);
+                    if($thePlaylist.length > 5){
+                        $.post('https://stillkonfuzed.com/Music/Galib.php',{CloudUpload : 'Galib' , Playlist : $thePlaylist, PlaylistName : $expCloudName},(checkUpload)=>{
+                            UploaderRsvp = JSON.parse(checkUpload);
+                            if(UploaderRsvp.status === 'true'){
+                                Alert.Notify(UploaderRsvp.message,"player");
+                                $('.export-2-cloud-filename').attr('placeholder','Uploaded Successfully!');
+                            }else{
+                                Alert.Notify(UploaderRsvp.message,"player");
+                            }
+                        });
+                    }else{
+                        Alert.Notify("Looks like you have no music in the saved list! Search and save music to build a playlist first!","player");
+                    }
+                    
+                }
+            });
+            //normal behaviour overide
+            $(document).on("click",".imp-exp-cols:eq(3)",function(){
+                $('.uploaded-public-playlists').html('Loadeeng...');
+                $.post("https://stillkonfuzed.com/Music/Galib.php",{BrowsePlaylists:'eyeBrows'},(browsing)=>{
+                     $filesFound = JSON.parse(browsing);
+                     $('.uploaded-public-playlists').html('');
+                     $filesFound.data.map((file)=>{
+                        myAchtml = `<div class="cloud-playleest">${file.filename}</div>`;
+                        $('.uploaded-public-playlists').append(myAchtml);
+                     });
+                });
+            });
+            //playlist search
+            $(document).on("input",".search-playlist",function(){
+                $thePSearch = this;
+                if($($thePSearch).val().length > 0){
+                   $('.uploaded-public-playlists').html('Loadeeng...');
+                    $.post("https://stillkonfuzed.com/Music/Galib.php",{BrowsePlaylists:'eyeBrows',PlaylistSearch:$($thePSearch).val()},(browsing)=>{
+                        $filesFound = JSON.parse(browsing);
+                        $('.uploaded-public-playlists').html('');
+                        $filesFound.data.map((file)=>{
+                            myAchtml = `<div class="cloud-playleest">${file.filename}</div>`;
+                            $('.uploaded-public-playlists').append(myAchtml);
+                        });
+                    });
+                }
+            });
+            $(document).on("click",'.cloud-playleest',function(e){
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                $theFileClicked = $(this).text();
+                $('.browsing-playlist-preview').html(`<div  class="uploaded-playlist-contents-x">Back</div><div  class="uploaded-playlist-contents-y">Import List</div>`);
+                $.post("https://stillkonfuzed.com/Music/Galib.php",{getFile: $theFileClicked},(exists)=>{
+                    $theMusicInPlaylist = JSON.parse(exists);
+                    //console.log($theMusicInPlaylist);
+                    $cloudImportable = $theMusicInPlaylist.file_data;
+                    if($theMusicInPlaylist.status === "file_found"){
+                        $theMusicInPlaylist.file_data.map((FileData)=>{
+                            runningOutOfVariables = `<div  class="uploaded-playlist-contents">${FileData.Name}</div>`;
+                            $('.browsing-playlist-preview').append(runningOutOfVariables);
+                        });
+                        $('.browsing-playlist-preview').show(1000);
+                        $('.uploaded-public-playlists').hide(1000);
+                    }else{
+                        Alert.Notify($theMusicInPlaylist.message,"player");
+                    }
+                })
+            })
+            $(document).on('click','.uploaded-playlist-contents-x',function(e){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                $('.browsing-playlist-preview').hide(1000);
+                $('.uploaded-public-playlists').show(1000);
+            });
+            $(document).on('click','.uploaded-playlist-contents-y',function(e){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if(confirm("If you import this playlist, your current playlist will be wiped! Do you really want to import this?")){
+                    console.log($cloudImportable);
+                    localStorage.setItem(SavedStorage,JSON.stringify($cloudImportable));
+                    localStorage.setItem('favListChanged','true');
+                    localStorage.setItem('savedListChanged','true');
+                    $('.browsing-playlist-preview').show(1000);
+                    $('.uploaded-public-playlists').hide(1000);
+                    $('.saved-playlist').click();
+                }
+            });
+            $(document).on('click','.local-exp-imp-button',function(e){
+                e.stopImmediatePropagation();
+            });
+            $(document).on('click',".trigger-local-import",function(e){
+                $('.import-file-name').click();
+            });
+
+            
+        </script>
+        <script class="Galib-Settings">
+            $(document).on('click','.slow-playback-btn',function(){
+                MusicControls.Speed(-0.1);
+            });
+            $(document).on('click','.fast-playback-btn',function(){
+                MusicControls.Speed(+0.1);
+            });
+            $(document).on('click','.reset-playback-btn',function(){
+                $('#player')[0].playbackRate = 1;
+                $('.playback-speed-value').html(String($('#player')[0].playbackRate).substring(0,3));
+            });
+            //EQ Controls 
+            $(document).on('click',".eq-switch",function(){
+                if($('.eq-switch').is(':checked')){
+                    source.disconnect(0);
+                    analyzer.disconnect(0);
+                    highFreq.disconnect(0);
+                    lowFreq.disconnect(0);
+                    panNode.disconnect(0);
+                    //gainNode.disconnect(0);
+
+                    source.connect(lowFreq);
+                    lowFreq.connect(highFreq);
+                    highFreq.connect(panNode);
+                    panNode.connect(analyzer);
+                    //gainNode.connect(analyzer);
+                    analyzer.connect(audioCtx.destination);
+
+                    highFreq.type = "highshelf";
+                    highFreq.frequency.value = parseInt($('.high-freq').val());
+                    highFreq.gain.value = parseInt($('.high-gain').val());
+
+                    lowFreq.type = "lowshelf";
+                    lowFreq.frequency.value = parseInt($('.low-freq').val());
+                    lowFreq.gain.value = parseInt($('.low-gain').val());
+
+                    //gainNode.gain.value =  parseFloat($('.eq-gain-bars').val());
+
+                    //apply last preset settings
+                    if(localStorage.getItem("EqPresetActive") && localStorage.getItem("EqPresetActive")){
+                        $('.eq-preset').eq(localStorage.getItem("EqPresetActive")).click();
+                    }else{
+                        $('.eq-preset').eq(0).click();
+                    }
+                    //$('.eq-filter-bars').prop("disabled", false);
+                    //$('.eq-filter-bars').css({"transform":'rotate(-90deg)'});
+                    $('.hd-visual').text('EQ Enabled');
+                }else{
+                    source.disconnect(0);
+                    analyzer.disconnect(0);
+                    highFreq.disconnect(0);
+                    lowFreq.disconnect(0);
+                    //gainNode.disconnect(0);
+                    panNode.disconnect(0);
+                    source.connect(panNode);
+                    panNode.connect(analyzer);
+                    analyzer.connect(audioCtx.destination);
+
+                    //visual adjustments
+                    $('.eq-preset').removeClass('preset-active');
+                    $('.eq-filter-bars').prop("disabled", true);
+                    $('.eq-filter-bars').css({"transform":'rotate(0deg)'});
+                    $('.hd-visual').text('EQ Disabled');
+                }
+            });
+
+            //EQ sliders control
+            //First range-slider from left
+            $(document).on('input','.low-freq',function(){
+                lowFreq.frequency.value = parseInt($(this).val());
+                $('.eq-stat-val:eq(0)').text(parseInt($(this).val()));
+            });
+            //Second range-slider from left
+            $(document).on('input','.low-gain',function(){
+                lowFreq.gain.value = parseFloat($(this).val());
+                $('.eq-stat-val:eq(1)').text(parseInt($(this).val()));
+            });
+            //Forth range-slider from left
+            $(document).on('input','.high-freq',function(){
+                highFreq.frequency.value = parseInt($(this).val());
+                $('.eq-stat-val:eq(3)').text(parseInt($(this).val()));
+            });
+            //Third range-slider from left
+            $(document).on('input','.high-gain',function(){
+                highFreq.gain.value = parseFloat($(this).val());
+                $('.eq-stat-val:eq(2)').text(parseInt($(this).val()));
+            });
+            //if you ever want to activate gain node from code : here
+            // $(document).on('input','.eq-gain-bars',function(){
+            //     gainNode.gain.value = parseFloat($(this).val());
+            // });
+
+            //EQ Preset Nav Control
+            $('.preset-nav-right').click(function() {
+                event.preventDefault();
+                $('.eq-presets-block').animate({
+                    scrollLeft: "+=800px"
+                }, "slow");
+            });
+            $('.preset-nav-left').click(function() {
+                event.preventDefault();
+                $('.eq-presets-block').animate({
+                    scrollLeft: "-=800px"
+                }, "slow");
+            });
+
+            //Apply condo presets
+            $(document).on('click','.eq-preset',function(e){
+                if(!$('.eq-switch').is(':checked')){
+                    Alert.Notify("Enable Equilizer for effects to apply!",'settings');
+                    e.stopImmediatePropagation();
+                }else{
+                    localStorage.setItem("EqPresetActive",$(this).index());
+                    // if($(this).hasClass('preset-active')){
+                    //     //eq is active with preset so do not double apply effects.
+                    // }else{
+                        $('.hd-visual-x').html($(this).html());
+                        $('.eq-preset').removeClass('preset-active');
+                        $eQpreset = $(this).data('preset');
+                        $eQconfig = $(this).data('config');
+                        $isProBand = $(this).data('hd');
+                        $(this).addClass('preset-active');
+                        $eqConfVals = $eQconfig.split(',');
+                        
+                        //show stats first 
+                        $('.eq-stat-val:eq(0)').text($eqConfVals[0]);
+                        $('.eq-stat-val:eq(1)').text($eqConfVals[1]);
+                        $('.eq-stat-val:eq(2)').text($eqConfVals[3]);
+                        $('.eq-stat-val:eq(3)').text($eqConfVals[2]);
+
+                        //Bypass Eq Slider | Beyond slider limits
+                        if($isProBand === "yes"){
+                            $('.eq-bars').css({
+                                'transform': 'scale(0.8)'
+                            });
+                            $('.LegendMode-lol').css({
+                                'transform': 'scaleX(0)'
+                            });
+                            $('.eq-filter-bars').prop("disabled", true);
+                            $('.eq-filter-bars').css({"transform":'rotate(0deg)'});
+                            $('.hd-visual').text('High Definition');
+                            lowFreq.frequency.value = $eqConfVals[0];
+                            lowFreq.gain.value = $eqConfVals[1];
+                            highFreq.frequency.value = $eqConfVals[2];
+                            highFreq.gain.value = $eqConfVals[3];
+
+                        }else if($isProBand === "could_be"){ //FOR UI Level tuning but input type is text
+                            $('.eq-bars').css({
+                                'transform': 'scale(0)'
+                            });
+                            $('.LegendMode-lol').css({
+                                'transform': 'scaleX(1)'
+                            });
+                            $('.hd-visual').text('Disaster Mode');
+                            lowFreq.frequency.value = parseInt($('.eq-direct-value:eq(0)').val() === '' ? 1 : $('.eq-direct-value:eq(0)').val());
+                            lowFreq.gain.value = parseFloat($('.eq-direct-value:eq(1)').val() === '' ?  1 : $('.eq-direct-value:eq(1)').val());
+                            highFreq.frequency.value = parseInt($('.eq-direct-value:eq(3)').val() === '' ? 1 : $('.eq-direct-value:eq(3)').val());
+                            highFreq.gain.value = parseFloat($('.eq-direct-value:eq(2)').val() > 1 ? $('.eq-direct-value:eq(2)').val() : 1);
+                        }else{
+                            $('.eq-bars').css({
+                                'transform': 'scale(0.8)'
+                            });
+                            $('.LegendMode-lol').css({
+                                'transform': 'scaleX(0)'
+                            });
+                            $('.eq-filter-bars').prop("disabled", false);
+                            $('.eq-filter-bars').css({"transform":'rotate(-90deg)scale(0.8)'});
+                            $('.hd-visual').text('Standard Mode');
+                            $('.low-freq').val($eqConfVals[0]);
+                            $('.low-gain').val($eqConfVals[1]);
+                            $('.high-freq').val($eqConfVals[2]);
+                            $('.high-gain').val($eqConfVals[3]);
+                            lowFreq.frequency.value = parseInt($('.low-freq').val());
+                            lowFreq.gain.value = parseFloat($('.low-gain').val());
+                            highFreq.frequency.value = parseInt($('.high-freq').val());
+                            highFreq.gain.value = parseFloat($('.high-gain').val());
+                        }
+                        
+                    // }
+                }
+                
+            });
+            //LegendMode 
+            $(document).on('keyup keydown change keypress','.eq-direct-value',function(){
+                lowFreq.frequency.value = parseInt($('.eq-direct-value:eq(0)').val() === '' ? 1 : $('.eq-direct-value:eq(0)').val());
+                lowFreq.gain.value = parseFloat($('.eq-direct-value:eq(1)').val() === '' ?  1 : $('.eq-direct-value:eq(1)').val());
+                highFreq.frequency.value = parseInt($('.eq-direct-value:eq(3)').val() === '' ? 1 : $('.eq-direct-value:eq(3)').val());
+                highFreq.gain.value = parseFloat($('.eq-direct-value:eq(2)').val() > 1 ? $('.eq-direct-value:eq(2)').val() : 1);
+            })
+            //Pan Controls
+            $(document).on('input','.eq-pan-bars',function(){
+                panNode.pan.value = parseFloat($(this).val());
+                if(parseFloat($(this).val()) < 0){
+                    if(parseFloat($(this).val()) === -1){
+                        $leftPanValue = "10";
+                    }else{
+                        $leftPanValue = String($(this).val()).substring(3,4);
+                    }
+                    $('.playback-pan-value').html(`Left ${$leftPanValue}`);
+                }else if(parseFloat($(this).val()) === 0){
+                    $('.playback-pan-value').html(`Stereo`);
+                }else{
+                    if(parseFloat($(this).val()) === 1){
+                        $rightPanValue = "10";
+                    }else{
+                        $rightPanValue = String($(this).val()).substring(2,3);
+                    }
+                    $('.playback-pan-value').html(`Right ${$rightPanValue}`);
+                }
+            });
+            $(document).on("click",".pan-reset",function(){
+                $('.playback-pan-value').text('Stereo');
+                $('.eq-pan-bars').val(0);
+                panNode.pan.value = 0;
+            });
+        </script>
+        <script class="Galib-Customizations">
+            $(document).ready(function(){
+                //apply graphics
+                if(localStorage.getItem("gfx") && localStorage.getItem("gfx").length > 0){
+                    $('.dom-graphics').val(localStorage.getItem("gfx")).trigger('change');
+                }else{
+                    $('.dom-graphics').val("Max").trigger('change');
+                }
+                //apply shadow
+                if(localStorage.getItem("shaders") && localStorage.getItem("shaders").length >0){
+                    $('.dom-shadows').val(localStorage.getItem("shaders")).trigger('change');
+                }else{
+                    $('.dom-shadows').val("55").trigger('change');
+                }
+                //apply visualizer
+                if(localStorage.getItem("viz") && localStorage.getItem("viz").length >0){
+                    $('.dom-visualizer').val(localStorage.getItem("viz")).trigger('change');
+                }else{
+                    $('.dom-visualizer').val("dualbars").trigger('change');
+                }
+            });
+            $(document).on("change",".dom-graphics",function(){
+                graphicsQuality = $(this).val();
+                localStorage.setItem("gfx",graphicsQuality);
+                $('.gfx-note').html($(this).find(':selected').data('details'));
+                if(graphicsQuality !== "Max"){
+                    $('style:eq(0)').html("")
+                    $('style:eq(0)').append(`body *{-webkit-transition: all ${graphicsQuality}s ease-in-out!important;
+                        -moz-transition: all ${graphicsQuality}s ease-in-out!important;
+                        -o-transition: all ${graphicsQuality}s ease-in-out !important;
+                        -ms-transition: all ${graphicsQuality}s ease-in-out !important;
+                        transition: all ${graphicsQuality}s ease-in-out !important;}`
+                    );
+
+                }else{
+                    $('style:eq(0)').html("");
+                }
+            });
+            $(document).on("change",".dom-shadows",function(){
+                shadowsQuality = $(this).val();
+                localStorage.setItem("shaders",shadowsQuality);
+                document.documentElement.style.setProperty('--alpha',`${shadowsQuality}%`);
+                $('.shadow-note').html($(this).find(':selected').data('details'));
+            });
+
+            $(document).on("change",".dom-visualizer",function(){
+                $self = this;
+                localStorage.setItem("viz",$($self).val());
+                wave = null;
+                var wave = new Wave();
+                wave.fromElement("player", "visualizerX", {
+                    type: $($self).val(),
+                    colors: ['red'],
+                    stroke: 1,
+                }, audioCtx, source, analyzer);
+            });
+
+            wave = null;
+            //Galib - The Visualizer Instanc
+            var wave = new Wave();
+            //Colours
+            $color = ['red','green','blue','pink','yellow','orange','purple','deeppurple','lightblue','teal','lime','gray','black'];
+            $visualizerTypes = ['dualbars','ring','wave','shine','orbs','flower','star','bigbars'];
+            $('body').on('click',function(){
+                //Galib - The Visualizer Instanc
+                colorNew = Utils.ShuffleArray($color);
+                $vType = Utils.ShuffleArray($visualizerTypes);
+                $cold = colorNew[1];
+                wave.fromElement("player", "visualizerX", {
+                    type: $(".dom-visualizer").val(),
+                    colors: [$cold],
+                    stroke: 1,
+                }, audioCtx, source, analyzer);
+                
+                // wave.fromElement("player", "visualizer-min", {
+                //     type: 'shine',//$vType[1],
+                //     colors: [$cold],
+                //     stroke: 1,
+                // }, audioCtx, source, analyzer);
+                try{
+                    const IntervalC = setInterval(()=>{
+                        AppliedCol = JSON.parse(wave.activeCanvas.visualizerX).colors;
+                        document.documentElement.style.setProperty('--theme',`var(--${AppliedCol})`);
+                        clearInterval(IntervalC);
+                    },500);
+                }catch(Exception){
+                    console.log(Exception);
+                    console.clear();
+                }
+            });
+        </script>
+        <script class="Galib-Controls">
+            
+            /* Player Controls */
+                $(document).on("click",".main-repeat",function(){
+                    MusicControls.Loop(this);
+                });
+                
+                //Galib - Seekbar 
+                // $(document).on('mousedown', ".seekbar", function() {
+                //     MusicControls.Pause();
+                // });
+
+                //Galib - Seekbar 
+                // $(document).on('mouseup', ".seekbar", function() {
+                //     MusicControls.Play();
+                // });
+
+                //Galib - Seekbar 
+                $(document).on('input', ".seekbar", function() {
+                    var currentTime = $('#player')[0].currentTime;
+                    var duration = $('#player')[0].duration;
+                    seekTo = $(this).val() / 100;
+                    var playFrom = $('#player')[0].duration * seekTo;
+                    MusicControls.PlayFrom(playFrom);
+                });
+
+                //Galib - Next Play Button 
+                $(document).on("click", ".main-prev", function() {
+                    $(".main-prev").find('span').css({
+                        'transition': 'all 1s ease-in-out',
+                        'transform': 'translateX(-160px)'
+                    })
+                    setTimeout(() => {
+                        $(".main-prev").find('span').css({
+                            'transition': 'all 1s ease-in-out',
+                            'transform': 'translateX(0)'
+                        });
+                    }, 1000);
+                    MusicControls.Pause();
+                    //todo : check for start of music
+                    if($PlaylistPlaying === 'saved'){
+                        $(".now-playing:eq(0)").prev().click();
+                    }else{
+                        if($(".now-playing").length > 1){
+                            $(".now-playing:eq(1)").prev().click();
+                        }else{
+                            $(".now-playing:eq(0)").prev().click();
+                        }
+                    }
+                });
+
+                //Galib - Next Play Button 
+                $(document).on("click", ".main-next", function() {
+                    $(".main-next").find('span').css({
+                        'transition': 'all 1s ease-in-out',
+                        'transform': 'translateX(160px)'
+                    })
+                    setTimeout(() => {
+                        $(".main-next").find('span').css({
+                            'transition': 'all 1s ease-in-out',
+                            'transform': 'translateX(0)'
+                        });
+                    }, 1000);
+                    MusicControls.Pause();
+                    //todo : check of end reached
+                    if($PlaylistPlaying === 'saved'){
+                        $(".now-playing:eq(0)").next().click();
+                    }else{
+                        if($(".now-playing").length > 1){
+                            $(".now-playing:eq(1)").next().click();
+                        }else{
+                            $(".now-playing:eq(0)").next().click();
+                        }
+                    }
+                });
+
+                //Galib - Main Play Button 
+                $(document).on("click", ".main-play", function() {
+                    $(".main-play").find('span').css({
+                        'transition': 'all 1s ease-in-out',
+                        'transform': 'scale(2)'
+                    })
+                    setTimeout(() => {
+                        $(".main-play").find('span').css({
+                            'transition': 'all 1s ease-in-out',
+                            'transform': 'scale(1)'
+                        });
+                    }, 1000);
+                    if ($('.main-icon').text() === "stop") {
+                        if ($('.li-music').hasClass("online-music")) {
+                            if($(".online-music").hasClass('now-playing')){
+                                if($PlaylistPlaying === 'saved'){
+                                    $('.now-playing:eq(0)').click();
+                                }else{
+                                    if($(".now-playing").length > 1){
+                                        $(".now-playing:eq(1)").click();
+                                    }else{
+                                        $(".now-playing:eq(0)").click();
+                                    }
+                                }
+                            }else{
+                                $('.from-saved').eq(0).click();
+                                $('.main-icon').text("pause");
+                            }
+                        } else {
+                            $(".main-search").prop("placeholder", 'Search a song to play!');
+                        }
+                    } else if ($('.main-icon').text() === "play_arrow") {
+                        MusicControls.Play();
+                    } else if ($('.main-icon').text() === "pause") {
+                        MusicControls.Pause();
+                    }
+                });
+            /* End Player Controls */
+        </script>    
+        <script class="Galib-Navigation">
+            /* Navigations */
+                //Party Mode
+                $(document).on('click','.strict-branding',function(e){
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    // $('#visualizerX').css({'opacity':'1'});
+                    // $('.visualizer').css('opacity','0');
+                    // $('.main-controller').css('opacity','0');
+                    
+                    // $partyMode = setInterval(()=>{
+                    //     $('body').click();
+                    //     console.log('party mode active');
+                    // },1500);
+                    Tutorial.Init();
+                });
+                $(document).on("click",".tutorial-skipper",function(){
+                    Tutorial.skipTutorial();
+                });
+                $(document).on('click','.visualizer',function(){
+                    $('#visualizerX').css({'opacity':'0.5'});
+                    $('.visualizer').css('opacity','1');
+                    $('.main-controller').css('opacity','1');
+                    clearInterval($partyMode);
+                });
+                $(document).on("click", '.playlist-icons', function() {
+                    $('.playlist-icons').removeClass('playlist-active');
+                    $(this).addClass('playlist-active');
+                    //routes & renderers
+                    if ($(this).text() === "save") {
+                        Playlists.renderSavedList("false");
+                        $('.saved-music-list-ul').show();
+                        $('.fav-music-list-ul').hide();
+                        $('.import-playlist-div').hide();
+                    } else if ($(this).text() === "star") {
+                        Playlists.renderFavList("false");
+                        $('.saved-music-list-ul').hide();
+                        $('.fav-music-list-ul').show();
+                        $('.import-playlist-div').hide();
+                    } else if($(this).text() ==="import_export"){
+                        $('.import-playlist-div').show();
+                        $('.saved-music-list-ul').hide();
+                        $('.fav-music-list-ul').hide();
+                    }
+                });
+
+                //Galib - Player Screen
+                $(document).on("click", ".goto-player", function() {
+                    $(".player-row").css({
+                        'transform': `scale${XorY}(1)`
+                    });
+                    $(".search-row").css({
+                        'transform': `scale${XorY}(0)`
+                    });
+                    $('.main-controller').css({
+                        'transform': `scale(1)`,
+                        'margin-bottom': '0%'
+                    });
+
+                    $('#visualizerX').css({
+                        'height': "100vh",
+                        "margin-top": "0%",
+                        'filter':'none'
+                    });
+                    $('.currently-playing-bg').css({
+                        'height': "90vh",
+                        "margin-top": "0%",
+                        'line-height':"90vh",
+                        'width': "100vw",
+                        'transform':'rotate(0deg) scale(1) translate(0%, 0%)',
+                        'filter':'none',
+                        'opacity': '0.2'
+                    });
+                });
+                // To saved list
+                $(document).on("click", ".goto-list", function() {
+                    $(".player-row").css({
+                        'transform': `scale${XorY}(0)`
+                    });
+                    $(".search-row").css({
+                        'transform': `scale${XorY}(0)`
+                    });
+                    $(".list-row").css({
+                        'transform': `scale${XorY}(1)`
+                    });
+                    $('.main-controller').css({
+                        'transform': `scale(0.3)`,
+                        'margin-bottom': '-5.1%'
+                    });
+                    $('#visualizerX').css({
+                        "margin-top": "0%",
+                        'height': "25vh",
+                        'filter':'blur(3px)'
+                    });
+                    $('.currently-playing-bg').css({
+                        "margin-top": "0%",
+                        'height': "100vh",
+                        'width': "100%",
+                        'line-height':"100vh",
+                        'transform':'rotate(-90deg) scale(0.5) translate(0%, -174%)',
+                        'filter':'none',
+                        'opacity': '0.5'
+                    });
+                    Playlists.renderSavedList();
+                });
+                //From list to player
+                $(document).on("click", ".goto-player-from-list", function() {
+                    $(".player-row").css({
+                        'transform': `scale${XorY}(1)`
+                    });
+                    $(".list-row").css({
+                        'transform': `scale${XorY}(0)`
+                    });
+                    $('.main-controller').css({
+                        'transform': `scale(1)`,
+                        'margin-bottom': '0%'
+                    });
+                    $('#visualizerX').css({
+                        "margin-top": "0%",
+                        'height': "100vh",
+                        'filter':'none'
+                    });
+                    $('.currently-playing-bg').css({
+                        "margin-top": "0%",
+                        'height': "90vh",
+                        'line-height':"90vh",
+                        'width': "100vw",
+                        'transform':'rotate(0deg) scale(1) translate(0%, 0%)',
+                        'filter':'none',
+                        'opacity': '0.2'
+                    });
+                });
+                //Galib - Search Screen
+                $(document).on("click", ".goto-search", function() {
+                    $(".player-row").css({
+                        'transform': `scale${XorY}(0)`
+                    });
+                    $(".list-row").css({
+                        'transform': `scale${XorY}(0)`
+                    });
+                    $(".search-row").css({
+                        'transform': `scale${XorY}(1)`
+                    });
+                    $('.main-controller').css({
+                        'transform': `scale(1)`,
+                        'margin-bottom': '0%'
+                    });
+                    $('#visualizerX').css({
+                        "margin-top": "28.5%",
+                        'height': "40vh",
+                        'filter':'blur(3px)'
+                    });
+                    $('.currently-playing-bg').css({
+                        "margin-top": "28.5%",
+                        'height': "40vh",
+                        'line-height':"40vh",
+                        'width': "100vw",
+                        'transform':'rotate(0deg) scale(1) translate(0%, 0%)',
+                        'filter':'blur(2px)',
+                        'opacity': '0.2'
+                    });
+                    $('.main-search').focus();
+                });
+                //Galib - From search to Player Screen
+                $(document).on("click", ".from-search", function() {
+                    setTimeout(() => {
+                        $(".player-row").css({
+                            'transform': `scale${XorY}(1)`
+                        });
+                        $(".search-row").css({
+                            'transform': `scale${XorY}(0)`
+                        });
+                        $('.main-controller').css({
+                            'transform': `scale${XorY}(1)`
+                        });
+                        $('#visualizerX').css({
+                            "margin-top": "0%",
+                            'height': "100vh",
+                            'filter':'none'
+                        });
+                        $('.currently-playing-bg').css({
+                            "margin-top": "0%",
+                            'height': "90vh",
+                            'line-height':"90vh",
+                            'width': "100vw",
+                            'transform':'rotate(0deg) scale(1) translate(0%, 0%)',
+                            'filter':'none',
+                            'opacity': '0.2'
+                        });
+                    }, 3000);
+                });
+                //Minimise 
+                $(document).on("click",".superSettings",function(){
+                    if($('.super-settings').text() === "open_with"){
+                        $('.main-section').css({'transform': 'scale(1)translate(0%, 0%)'});
+                        $('.super-settings').text('settings');
+                        $('.setting-section').css({'transform': 'scaleY(0)translate(100%,100%)'});
+                        $('.customise-section').css({"transform":'scaleX(0)translate(100%, 100%)'});
+                    }else{
+                        $('.main-section').css({'transform': 'scale(0.5) translate(-49.5%, -50.5%)'});
+                        //$('.setting-section').css({'transform': 'scaleY(1)translate(0%,0%)'});//scale(0.5) translate(-50%, -50%)
+                        $('.setting-section').css({'transform': 'scale(0.5) translate(-50%, -50%)'});
+                        $('.super-settings').text('open_with');
+                        $('.customise-section').css({"transform":'scale(0.5)translate(-50%,50%)'});
+                    }
+                });
+                $(document).on("click",".min-max-eqScreen",function(){
+                    if($('.super-settings-1').text() === "open_with"){
+                        $('.main-section').css({'transform': 'scale(0)translate(0%, 0%)'});
+                        $('.super-settings-1').text('settings');
+                        $('.setting-section').css({'transform': 'scaleY(1)translate(-50%,0%)'});
+                        $('.customise-section').css({"transform":'scaleX(0)translate(100%, 100%)'});
+                    }else{
+                        $('.main-section').css({'transform': 'scale(0.5) translate(-49.5%, -50.5%)'});
+                        //$('.setting-section').css({'transform': 'scaleY(1)translate(0%,0%)'});//scale(0.5) translate(-50%, -50%)
+                        $('.setting-section').css({'transform': 'scale(0.5) translate(-50%, -50%)'});
+                        $('.super-settings-1').text('open_with');
+                        $('.customise-section').css({"transform":'scale(0.5)translate(-50%,50%)'});
+                    }
+                });
+
+                $(document).on("click", ".min-max-customScreen", function(){
+                    if($('.super-settings-2').text() === "open_with"){
+                        $('.main-section').css({'transform': 'scale(0)translate(0%, 0%)'});
+                        $('.super-settings-2').text('settings');
+                        $('.setting-section').css({'transform': 'scaleY(0)translate(100%,100%)'});
+                        $('.customise-section').css({"transform":'scale(1)translate(0%,0%)'});
+                    }else{
+                        $('.main-section').css({'transform': 'scale(0.5) translate(-49.5%, -50.5%)'});
+                        $('.setting-section').css({'transform': 'scale(0.5) translate(-50%, -50%)'});
+                        $('.customise-section').css({"transform":'scale(0.5)translate(-50%,50%)'});
+                        $('.super-settings-2').text('open_with');
+                    }
+                });
+            /* End Navigations */
+        </script>
+        <script class="Galib-DataOp">
+            /* Data Operations */
+                //Add to favourites
+                $(document).on("click", ".save-fav-icon", function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+
+                    SavedJson = JSON.parse(localStorage.getItem(SavedStorage));
+                    MediaUrl = $(this).parent().parent().data().mediaurl;
+                    var index = SavedJson.findIndex(function(item, i) {
+                        return item.MediaUrl === MediaUrl
+                    });
+                    if (SavedJson[index].IsFav) {
+                        SavedJson[index].IsFav = false;
+                        $(this).text('star_border');
+                    } else {
+                        SavedJson[index].IsFav = true;
+                        $(this).text('star');
+                    }
+                    localStorage.setItem(SavedStorage, JSON.stringify(SavedJson));
+                    localStorage.setItem("favListChanged", "true");
+                });
+
+                //Galib - Delete from saved lists
+                $(document).on("click", ".save-del-icon", function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    $deleter = this;
+                    if ($(this).parent().find('.song-title').text() === "Click again to confirm deletion!") {
+                        SavedJson = JSON.parse(localStorage.getItem(SavedStorage));
+                        MediaUrl = $(this).parent().parent().data().mediaurl;
+                        //DeleteSavedRow = SavedJson.find(el => el.MediaUrl === MediaUrl);
+                        var index = SavedJson.findIndex(function(item, i) {
+                            return item.MediaUrl === MediaUrl
+                        });
+                        delete SavedJson[index];
+                        NewSavedData = SavedJson.filter(function(x) {
+                            return x !== null
+                        });
+                        localStorage.setItem(SavedStorage, JSON.stringify(NewSavedData));
+                        localStorage.setItem("savedListChanged", "true");
+                        $(this).parent().parent().css({
+                            'transform': 'rotate(180deg)'
+                        });
+                        setTimeout(() => {
+                            $($deleter).parent().parent().remove();
+                        }, 1500);
+                    } else {
+                        $(this).parent().find('.song-title').text("Click again to confirm deletion!");
+                        $(this).parent().find('.song-title').css({
+                            'padding-left': '42%'
+                        });
+                        setTimeout(() => {
+                            $($deleter).parent().find('.song-title').text($($deleter).parent().parent().data().mediatitle);
+                            $($deleter).parent().find('.song-title').css({
+                                'padding-left': '0%'
+                            });
+                        }, 4000);
+                    }
+                });
+                //Save song to saved list
+                $(document).on("click", ".save-icon", function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    console.log("saved");
+                    MediaUrl = $(this).parent().parent().data().mediaurl;
+                    MediaTitle = $(this).parent().parent().data().mediatitle;
+                    if (localStorage.getItem(SavedStorage)) {
+                        Music = {};
+                        if (SavedJson.length > 1) {
+                            Music.Id = SavedJson.length + 1;
+                        } else {
+                            Music.Id = 1;
+                        }
+                        Music.Name = MediaTitle;
+                        Music.MediaUrl = MediaUrl;
+                        Music.IsFav = false;
+                        Music.CreatedOn = Utils.TodayDate();
+                        if (JSON.stringify(SavedJson).includes(MediaUrl)) {
+                            $(this).text('done_all');
+                        } else {
+                            SavedJson.push(Music);
+                            SaveSortedMusic = SavedJson.sort((a, b) => a.Name.localeCompare(b.Name));
+                            localStorage.setItem(SavedStorage, JSON.stringify(SaveSortedMusic));
+                            $(this).text('done');
+                            localStorage.setItem("savedListChanged", "true");
+                        }
+                    } else {
+                        $(this).text('cancel');
+                    }
+                });
+            
+            /* End Data Operations */
+        </script>
+        <script class="Galib-DataList">
+           
+            //Galib - The Music List
+            $(document).on("click", ".li-music", function() {
+                $playingLi = this;
+                nativeURL = $(this).data().mediaurl;
+
+                if ($($playingLi).hasClass("online-music")) {
+                    localStorage.setItem("lastPlayed", nativeURL);
+                    $(".li-music").removeClass("now-playing");
+                    $(this).addClass("now-playing");
+                    if($(this).parent().hasClass('fav-music-list-ul')){
+                        $PlaylistPlaying = 'favourites';
+                    }else{
+                        $PlaylistPlaying = 'saved';
+                    }
+                    $('.playing-li').remove();
+                   // $(".list-progressbar").remove();
+                    $.get("https://stillkonfuzed.com/Music/Galib.php?play=" + nativeURL,(details) => {
+                            details = JSON.parse(details);
+                            for (var key in details) {
+                                var innerDetails = details[key];
+                                $playUrl = innerDetails.encrypted_media_url;
+                                $('.main-music-title').html(innerDetails.song); //singers
+                                // $('.main-music-desc').text(innerDetails.singers);
+                                $('.main-music-img').attr("src", `${innerDetails.image}`);
+                                $('.main-music-more-details').html('');
+                                $('.main-music-more-details').append(`<div class="music-meta">G-Player : Built by Galib</div><div class="music-meta">Artist : ${innerDetails["singers"]}</div>
+                                <div class="music-meta">Year : ${innerDetails.year}</div>
+                                <div class="music-meta">Played : ${innerDetails.play_count}</div>
+                                <div class="music-meta">Lyrics : ${innerDetails.has_lyrics}</div>
+                                <div class="music-meta album-name">Album : ${innerDetails.album}</div>
+                                <div class="music-meta">320Kbps : ${innerDetails["320kbps"]}</div>
+                                <div class="music-meta">Language : ${innerDetails["language"]}</div>
+                                <div class="music-meta">Art : <img class="meta-img" src="${innerDetails.image}"/></div>`);
+                                $startMapping = 0;
+                                Object.keys(innerDetails).forEach((inValue)=>{
+                                    $skipMap = Object.keys(innerDetails)[$startMapping]
+                                    if($skipMap === "song" || $skipMap === "singers" || $skipMap === "year" ||$skipMap === "play_count" ||$skipMap === "has_lyrics" ||$skipMap === "album" ||$skipMap === "320kbps" ||
+                                    $skipMap === "language" || $skipMap === "image" || innerDetails[inValue] === "" || typeof(innerDetails[inValue]) === 'object' || String(innerDetails[inValue]).includes('http') || 
+                                    $skipMap === 'encrypted_media_url' || $skipMap === 'encrypted_media_path'|| $skipMap === 'label_url'){
+                                        //skip
+                                    }else {
+                                        $('.main-music-more-details').append(`<div class="music-meta">${Object.keys(innerDetails)[$startMapping].replaceAll('_',' ')} : ${innerDetails[inValue]}</div>`);
+                                    }
+                                    $startMapping++;
+                                });
+                                $('.main-music-more-details').append(`<div class="music-meta">Khatam, Tata, Finish, Goodbye!</div>`);
+                            }
+                            var decUrl = decryptByDES($playUrl, $gkey);
+                            $("#player")[0].autoplay = true;
+                            $('#player').attr("src",PROXY+decUrl);
+                            MusicControls.Play();
+                            player.playbackRate =  parseFloat($('.playback-speed-value').html())
+                        });
+                } else {
+                    Alert.Notify('No music selected from list!','player');
+                }
+                //Galib - The Music Runtime Progress
+                player.removeEventListener('timeupdate', musicProgress);
+                player.addEventListener("timeupdate", musicProgress, true);
+                player.onloadstart = function() {
+                    $('.main-icon').text("refresh");
+                    $('.main-icon').addClass('rotating');
+                    ImplementNotificationControls();
+                };
+
+                player.onloadeddata = function() {
+                    $('.main-icon').text("pause");
+                    $('.main-icon').removeClass('rotating');
+                };
+            });
+            
+
+            
+
+            //Galib - The Music Runtime End
+            player.addEventListener("ended", function musicEnded() {
+                console.log("music ended");
+                MusicControls.Next();
+            }, false);
+            
+            //Galib - Enter key trigger
+            $(document).on('keypress',function(e){
+                if (e.key === "Enter") {
+                    event.preventDefault();
+                    $(".search-btn").click();
+                }
+            });
+            //Galib - Search Input Handling
+            $(document).on("keyup keydown keypress", ".main-search", function() {
+                $(".search-btn").text('search');
+            });
+
+            //Galib - Search Button Handling
+            $(document).on("click", ".search-btn", function() {
+                searchEvt = this;
+                musicSearch = $(".main-search").val();
+                if ($(searchEvt).text() === 'search' || $(searchEvt).text() === 'autorenew') {
+                   //$(this).text('cancel');
+                   $(searchEvt).addClass('rotating');
+                   $(searchEvt).text('autorenew');
+                   $('.music-list-ul').html("");
+                    if (musicSearch.length > 1) {
+                        $.get(PROXY+"https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&includeMetaTags=1&query=" + musicSearch, (ms) => {
+                            $(searchEvt).text('cancel');
+                            $(searchEvt).removeClass('rotating');
+                            $('.search-row').addClass('search-expanded');
+                            ms = JSON.parse(ms);
+                            $songs = ms.songs.data;
+                            $('.music-list-ul').append(`<li class="safe-padding"></li>`);
+                            if ($songs.length < 1) {
+                                $searchHtml = `<li data-mediaUrl="" class="li-music" >
+                                                    <div class="item-content">
+                                                        <div class="item-inner ">
+                                                        <div class="item-title"><span class="icon material-icons s-icon">cancel</span><span class="song-title">No results found!</span></div>
+                                                        </div>
+                                                    </div>
+                                                </li>`;
+                                $('.music-list-ul').append($searchHtml).show(1000);
+                            } else {
+                                $('.online-music').remove();
+                                $songs.forEach((song) => {
+                                    songID = song.id;
+                                    $searchHtml = `<li data-mediaUrl="${songID}" class="li-music online-music from-search"  data-mediatitle="${song.title}">
+                                                        <div class="item-title"><img class="s-img" src="${song.image}" width="50px"/>
+                                                            <span class="song-title">${song.title} 
+                                                                <i class="song-subs">${typeof(song.description) === undefined ? "": `<span class="icon material-icons album-icon">album</span>` +song.description}</i>
+                                                            </span>
+                                                            <span class="icon material-icons save-icon">save</span>
+                                                            <!--<span class="icon material-icons s-icon">cloud</span>-->
+                                                        </div>
+                                                    </li>`;
+                                    $('.music-list-ul').append($searchHtml);
+                                });
+                                $.get(PROXY+`https://www.jiosaavn.com/api.php?p=1&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&__call=search.getResults`,(rs)=>{
+                                    rs = JSON.parse(rs);
+                                    $extraSearch = rs.results;
+                                    if($extraSearch.length > 0){
+                                        $pages = rs.total / 40;
+                                        $('.search-result-count').html(rs.total + "<br> Results").show(1000);
+                                        $extraSearch.map((m)=>{
+                                            $searchExtraHtml = `<li data-mediaUrl="${m.id}" class="li-music online-music from-search"  data-mediatitle="${m.title}">
+                                                                    <div class="item-title"><img class="s-img" src="${m.image}" width="50px"/>
+                                                                        <span class="song-title">${m.title} 
+                                                                            <i class="song-subs">${typeof(m.subtitle) === undefined ? "": `<span class="icon material-icons album-icon">album</span>` +m.subtitle}</i>
+                                                                        </span>
+                                                                        <span class="icon material-icons save-icon">save</span>
+                                                                        <!--<span class="icon material-icons s-icon">cloud</span>-->
+                                                                    </div>
+                                                                </li>`;
+                                            $('.music-list-ul').append($searchExtraHtml);
+                                        });
+                                        const promizeXX = Array.from(Array(parseInt($pages)+2)).map(function(x,idx) {
+                                            if(idx > 1 && idx < 12){
+                                                return fetch(PROXY+`https://www.jiosaavn.com/api.php?p=${idx}&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&__call=search.getResults`).then(res => res.json())
+                                            }
+                                        });
+                                        Promise.all(promizeXX).then(res => {
+                                            dataFiltered = res.filter(function( element ) {
+                                                return element !== undefined;
+                                            });
+                                            let AllSearchCombined = dataFiltered.reduce((acc, val) => acc = [...acc, ...val.results], [])
+                                            AllSearchCombined.map((mp,index)=>{
+                                                $searchExtraXHtml = `<li data-mediaUrl="${mp.id}" class="li-music online-music from-search"  data-mediatitle="${mp.title}">
+                                                                        <div class="item-title"><img class="s-img" src="${mp.image}" width="50px"/>
+                                                                            <span class="song-title">[${index}] ${mp.title} 
+                                                                                <i class="song-subs">${typeof(mp.subtitle) === undefined ? "": `<span class="icon material-icons album-icon">album</span>` +mp.subtitle}</i>
+                                                                            </span>
+                                                                            <span class="icon material-icons save-icon">save</span>
+                                                                            <!--<span class="icon material-icons s-icon">cloud</span>-->
+                                                                        </div>
+                                                                    </li>`;
+                                                $('.music-list-ul').append($searchExtraXHtml);
+                                            });
+                                        });
+                                        
+                                    }   
+                                });
+                            }
+                        });
+                    } else {
+                        $(".main-search").prop("placeholder", 'Type the song here first!');
+                        $(searchEvt).removeClass('rotating');
+                        $(searchEvt).text('search');
+                    }
+                } else {
+                    $(searchEvt).text('search');
+                    $(".main-search").val('')
+                    $('.music-list-ul').html('');
+                    $('.search-row').removeClass('search-expanded');
+                    $('.search-result-count').html(0 + "<br> Results").hide(1000);
+                }
+            });
+            // async function XtraSearch($pages,resultPlus,$thisXX){
+            //     Array.from(Array(parseInt($pages)+2)).map(async function(X,incrementorX) {
+            //         if(incrementorX > 1 && incrementorX < 12){
+            //             $.get(PROXY+`https://www.jiosaavn.com/api.php?p=${incrementorX}&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&__call=search.getResults`,(ds)=>{
+            //                 ds = JSON.parse(ds);
+            //                 const array3 = [...array1, ...array2];
+            //                 return this.resultPlus += ds.results.join(',');
+            //             });
+            //         }
+            //     },$thisXX);
+            // }
+        </script>    
+        <script class="Galib-Helpers">
+            /* Helper Functions */
+                
+                
+                //EXPORT/IMPORT HANDLER
+                var Export  = {
+                    downloadAsJson  : async ($newExportName)=>{
+                        if(localStorage.getItem('GalibPlayerSavedStorage') && localStorage.getItem('GalibPlayerSavedStorage').length > 5){
+                        $localExportable = localStorage.getItem('GalibPlayerSavedStorage');
+                        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent($localExportable);
+                            var downloadAnchorNode = document.createElement('a');
+                            downloadAnchorNode.setAttribute("href",     dataStr);
+                            downloadAnchorNode.setAttribute("download", $newExportName + ".json");
+                            document.body.appendChild(downloadAnchorNode);
+                            downloadAnchorNode.click();
+                            downloadAnchorNode.remove();
+                        }else{
+                            Alert.Notify('You do not have any music playlist created yet!','player');
+                        }
+                    }
+                }
+                
+                //PLAYLIST BINDERS
+                var Playlists = {
+                    //Create Fav List
+                    renderFavList : async ()=>{
+                        if (localStorage.getItem(SavedStorage) && localStorage.getItem(SavedStorage).length > 5) {
+                            FavCounter = 0;
+                            SavedList = JSON.parse(localStorage.getItem(SavedStorage));
+                            if (localStorage.getItem("favListChanged") === "true" || $('.fav-music-list-ul li').length < 1) {
+                                $('.fav-music-list-ul').html('');
+                                while (FavCounter < SavedList.length) {
+                                    if (localStorage.getItem("lastPlayed")) {
+                                        if (SavedList[FavCounter].MediaUrl === localStorage.getItem("lastPlayed")) {
+                                            isFavPlaying = " now-playing";
+                                        } else {
+                                            isFavPlaying = "";
+                                        }
+                                    }else{
+                                        isFavPlaying = "";
+                                    }
+                                    $savedHtml = `<li data-mediaUrl="${SavedList[FavCounter].MediaUrl}" class="li-music online-music from-fav ${isFavPlaying}" data-mediatitle="${SavedList[FavCounter].Name}">
+                                                        <div class="item-title">
+                                                            <span class="song-title">${SavedList[FavCounter].Name}</span>
+                                                            <span class="icon material-icons s-icon save-del-icon">delete</span>
+                                                            <span class="icon material-icons s-icon save-fav-icon">${ SavedList[FavCounter].IsFav === true ? "star" : "star_border"}</span>
+                                                        </div>
+                                                    </li>`;
+                                    if (SavedList[FavCounter].IsFav === true) {
+                                        $('.fav-music-list-ul').append($savedHtml);
+                                    } else {
+                                        $savedHtml = null; 
+                                    }
+                                    FavCounter++;
+                                }
+                            }else{
+                                while (FavCounter < SavedList.length) {
+                                    if (localStorage.getItem("lastPlayed")) {
+                                        if (SavedList[FavCounter].MediaUrl === localStorage.getItem("lastPlayed")) {
+                                            $('.fav-music-list-ul').find(`li.from-fav[data-mediaurl='${SavedList[FavCounter].MediaUrl}']`).addClass('now-playing');
+                                        } 
+                                    }
+                                    FavCounter++;
+                                }
+                            }
+                        }
+                        return true;
+                    },
+
+                    //Create Saved List
+                    renderSavedList : async ()=>{
+                        if (localStorage.getItem(SavedStorage) && localStorage.getItem(SavedStorage).length > 5) {
+                            QueryCounter = 0;
+                            SavedList = JSON.parse(localStorage.getItem(SavedStorage));
+                            if (localStorage.getItem("savedListChanged") === "true" || $('.saved-music-list-ul li').length < 1) {
+                                $('.saved-music-list-ul').html('');
+                                while (QueryCounter < SavedList.length) {
+                                    if (localStorage.getItem("lastPlayed")) {
+                                        if (SavedList[QueryCounter].MediaUrl === localStorage.getItem("lastPlayed")) {
+                                            isSavedPlaying = " now-playing";
+                                        } else {
+                                            isSavedPlaying = "";
+                                        }
+                                    }else{
+                                        isSavedPlaying = "";
+                                    }
+                                    $savedHtml = `<li data-mediaUrl="${SavedList[QueryCounter].MediaUrl}" class="li-music online-music from-saved ${isSavedPlaying}" data-mediatitle="${SavedList[QueryCounter].Name}">
+                                                        <div class="item-title">
+                                                            <span class="song-title">${SavedList[QueryCounter].Name}</span>
+                                                            <span class="icon material-icons s-icon save-del-icon">delete</span>
+                                                            <span class="icon material-icons s-icon save-fav-icon">${ SavedList[QueryCounter].IsFav === true ? "star" : "star_border"}</span>
+                                                        </div>
+                                                 </li>`;
+                                    $('.saved-music-list-ul').append($savedHtml);
+                                    QueryCounter++;
+                                }
+                            }else{
+                                while (QueryCounter < SavedList.length) {
+                                    if (localStorage.getItem("lastPlayed")) {
+                                        if (SavedList[QueryCounter].MediaUrl === localStorage.getItem("lastPlayed")) {
+                                            $('.saved-music-list-ul').find(`li.from-saved[data-mediaurl='${SavedList[QueryCounter].MediaUrl}']`).addClass('now-playing');
+                                        }
+                                    }
+                                    QueryCounter++;
+                                }
+                            }
+                        }else{
+                            $('.offline-music').remove();
+                            $savedHtml = `<li class="li-music offline-music from-fav">
+                                                <div class="item-title">
+                                                    <span class="song-title">Start searching and saving music, saved music appear here!</span>
+                                                </div>
+                                        </li>`;
+                            $('.saved-music-list-ul').append($savedHtml);
+                        }
+                        return true;
+                    }
+                }
+                
+                
+                //Ongoing music progress
+                function musicProgress() {
+                    var currentTime = this.currentTime;
+                    var duration = this.duration;
+                    $('.search-progressbar').css('width', `${(currentTime + .25) / duration * 100}%`);
+                    $('.seekbar').val((currentTime + .25) / duration * 100);
+                    $('.main-music-more-details').css('transform', `translate(-${(currentTime + .25) / duration * 100}%,0)`);
+                }
+
+                //BASIC UTILITIES
+                var Utils = {
+                    //Galib - Shuffle Array
+                    ShuffleArray :  (array)=>{
+                        var currentIndex = array.length,
+                            temporaryValue, randomIndex;
+                        while (0 !== currentIndex) {
+                            randomIndex = Math.floor(Math.random() * currentIndex);
+                            currentIndex -= 1;
+                            temporaryValue = array[currentIndex];
+                            array[currentIndex] = array[randomIndex];
+                            array[randomIndex] = temporaryValue;
+                        }
+                        return array;
+                    },
+                    //Date Helper
+                    TodayDate : ()=>{
+                        var today = new Date();
+                        var dd = String(today.getDate()).padStart(2, '0');
+                        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                        var yyyy = today.getFullYear();
+                        var hhh = String(today.getHours()).padStart(2, '0');
+                        var mmm = String(today.getMinutes()).padStart(2, '0');
+                        today = dd + '/' + mm + '/' + yyyy + " " + hhh + ":" + mmm;
+                        return today;
+                    },
+                    ClearIntervalsX : async ()=>{
+                        var id = window.setInterval(function() {}, 0);
+                        while (id--) {
+                            window.clearInterval(id); // will do nothing if no timeout with id is present
+                        }
+                    },
+                    Resolution : ()=>{
+                        const SW = window.screen.width;
+                        const SH = window.screen.height;
+                        const SPR = window.devicePixelRatio;
+                        if(parseInt(SW) === 1920 || parseInt(SH) === 1080 && parseInt(SPR) === 1){// Best Display
+                            console.log("Looks like you are using a 720p display! Please Zoom out to 70% for best experience.");
+                        }else if(parseInt(SW) > 1920 || parseInt(SH) > 1080 && parseInt(SPR) === 1){ // superior dsplay
+
+                        }else if(parseInt(SW) < 1920 || parseInt(SH) < 1080 && parseInt(SPR) === 1){ // old dsplay
+
+                        }else if(parseInt(SW) < 1920 || parseInt(SH) < 1080 && parseFloat(SPR) === 0.75){ //old but zoomed out and compatible
+
+                        }else{
+                            console.log("This music player is best experienced with 1920*1080px display. Try zooming out to -75%");
+                        }
+                    },
+                    UserAgent : ()=>{
+                        $brand = navigator?.userAgentData?.brands?.find(x=> x.brand === "Google Chrome");
+                        if(typeof($brand) !== "undefined" && $brand?.brand === "Google Chrome" && navigator?.userAgentData?.mobile === false){ 
+                            console.log(true);
+                        }else{ 
+                            Alert.Notify("This music player is only 100% compatible with Chrome, Nothing to do with browser actually, Its my limited designing skills! hehe","player");
+                        }
+                        
+                    }
+                }
+                //MUSIC CONTROLS
+                var MusicControls = {
+                    //Galib - Seek + time
+                    Seek : async (value)=>{
+                        player.currentTime += value;
+                    },
+                    //Galib - Player Pause
+                    Pause : async ()=>{
+                        player.pause();
+                        $('.main-icon').text("play_arrow");
+                        if(navigator && navigator.mediaSession && navigator.mediaSession.playbackState){
+                            navigator.mediaSession.playbackState = 'paused';
+                        }
+                    },
+                    Play : async ()=>{
+                        player.play();
+                        $('.main-icon').text("pause");
+                        if(navigator && navigator.mediaSession && navigator.mediaSession.playbackState){
+                            navigator.mediaSession.playbackState = 'playing';
+                        }
+                        
+                    },
+                    Speed : async (value)=>{
+                        $('#player')[0].playbackRate += value;
+                        $('#player')[0].defaultPlaybackRate += value;
+                        $('.playback-speed-value').html(String($('#player')[0].playbackRate).substring(0,3));
+                        if(String($('#player')[0].playbackRate) === "2.000000000000001"){
+                            Alert.Notify(`Speed beyond ${String($('#player')[0].playbackRate).substring(0,3)}x can crash the browser!`,'settings');
+                        }
+                    },
+                    Loop : async (iconControl)=>{
+                        if($('#player')[0].loop){
+                            $('#player')[0].loop = false;
+                            $(iconControl).find('.sub-sub-icon').removeClass('scaling');
+                            $(iconControl).find('.sub-sub-icon').text('repeat');
+                        }else{
+                            $('#player')[0].loop = true;
+                            $(iconControl).find('.sub-sub-icon').addClass('scaling');
+                            $(iconControl).find('.sub-sub-icon').text('repeat_one');
+                        }
+                    },
+                    PlayFrom : async (playTime)=>{
+                        $('#player')[0].currentTime = playTime;
+                    },
+                    Shuffle : async ()=>{
+                        //todo 
+                    },
+                    Next :  ()=>{
+                        $('.main-icon').text("play_arrow");
+                        $(".main-next").click();
+                    },
+                    Previous : ()=>{
+                        $(".main-prev").click();
+                    }
+                    
+
+                    
+                }
+                //CUSTOM ALERT HANDLER
+                var Alert = {
+                    Notify : (Title = "No Title",From = "player",YesText = "Ok",buttonsCount = 1,NoText ="Cancel")=>{
+                        $beforeAlert = $('.collapse-on-alert').attr('style');
+                        $settingsBeforeAlert = $('.setting-section').attr('style');
+                        if(typeof($beforeAlert) === 'undefined' || $beforeAlert === ''){
+                            $beforeAlert = 'transform: scale(1) translate(0%, 0%);';
+                        }
+                        $('.sooper-alert-head').html(Title);
+                        $('.action-yes').html(YesText);
+                        $('.action-no').html(NoText);
+                        if(parseInt(buttonsCount) === 1){
+                            $('.action-yes').removeClass('col-sm-6').addClass('col-sm-12');
+                            $('.action-no').hide();
+                        }else{
+                            $('.action-yes').addClass('col-sm-6').removeClass('col-sm-12');
+                            $('.action-no').show();
+                        }
+                        $('.sooper-alert').css({'opacity':'0.8','transform':'scaleY(1)'});
+                        if(From === "settings"){
+                            $('.collapse-on-alert').css({'transform':'scaleY(0.2) scaleX(0.2) translate(-200%,180%)'});
+                            $('.setting-section').css({'transform':'scale(2) translate(10%, 23%)'});
+                        }else if(From === "player"){
+                            $('.collapse-on-alert').css({'transform':'scaleY(0.3)scaleX(0.3)translateY(-95%)'});
+                        }
+                    }
+                }
+                //Audio API error handler
+                Audio.prototype.play = (function(play) {
+                    return function () {
+                    var audio = this,
+                        args = arguments,
+                        promise = play.apply(audio, args);
+                        if (promise !== undefined) {
+                            promise.catch(_ => {
+                                //Alert.Notify("No Music selected to play! Choose music from playlist or start searching in the search bar!","player");
+                                $('.main-icon').text("stop");
+                            });
+                        }
+                    };
+                })(Audio.prototype.play);
+            /* End Helper Functions */   
+        </script>
+        <script class="Galib-Tutorial">
+            Tutorial = {
+                Init : ()=>{
+                    if($('.super-settings').text() !== 'settings'){
+                        $('.super-settings').click();
+                        
+                    }else{
+                        $('.goto-search').click();
+                        Tutorial.Start();
+                    }
+                },
+                Start: ()=>{
+                    $('.tutorial').show(2000);
+                    T1 = setTimeout(()=>{
+                        $('.cursorouter').css({'transform': 'translate(310px, 10px)'});
+                    },2000);
+                    T2 = setTimeout(()=>{
+                        sia = 'Unstoppable';
+                        counterXX = 0;
+                        I1 = setInterval(()=>{
+                            if(counterXX === sia.length){
+                                $('.cursorouter').css({'transform': `translate(${window.innerWidth == 1280 ? '1020px' : '1640px'}, 10px)`});//translate(1640px, 10px)
+                                clearInterval(I1);
+                                Tutorial.Tutorial2();
+                            }else{
+                                Tutorial.TutorCursor();
+                                $('.main-search').focus();
+                                $('.main-search').val($('.main-search').val()+ sia[counterXX++]);
+                            }
+                        },1000);
+
+                    },4000);
+                },
+                Tutorial2 : ()=>{
+                    $('.t-help-text').html("Click Search Button to start searching!");
+                    T3 = setTimeout(()=>{
+                        Tutorial.TutorCursor();
+                        $('.search-btn').click();
+                    },2000);
+                    I2 = setInterval(()=>{
+                        if($('.music-list-ul li').length > 2){
+                            clearInterval(I2);
+                            $('.cursorouter').css({'transform': 'translate(235px, 72px)'});
+                            Tutorial.Tutorial3();
+                        }
+                    },1000);
+                },
+                Tutorial3 : ()=>{
+                    $('.t-help-text').html("Click on search result to start playing it!");
+                    T4 = setTimeout(()=>{
+                        Tutorial.TutorCursor();
+                        $('.music-list-ul li').eq(1).click();
+                    },2000);
+                    T5 = setTimeout(()=>{
+                        $('.cursorouter').css({'transform':'translate(64px, 12px)'});
+                        $('.t-help-text').html("Click on music list button to goto music list!");
+                        T6 = setTimeout(()=>{
+                            Tutorial.TutorCursor();
+                            $('.goto-list').click();
+                            $('.cursorouter').css({'transform':'translate(360px, 166px)'});//translate(1755px, 15px)
+                            Tutorial.Tutorial4();
+                        },3000);
+                    },7000);
+                },
+                Tutorial4 : ()=>{
+                    $('.t-help-text').html("Saved music will appear here once saved!");
+                    T7 = setTimeout(()=>{
+                        console.log(window.innerWidth);
+                        $('.cursorouter').css({'transform':`translate(${window.innerWidth == 1280 ? '1120px' : '1755px'}, 15px)`});
+                        $('.t-help-text').html("Lets goto search result and save music!");
+                    },4000);
+                    T8 = setTimeout(()=>{
+                        Tutorial.TutorCursor();
+                        $('.goto-search').click();
+                        $('.cursorouter').css({'transform':`translate(${window.innerWidth == 1280 ? '1015px' : '1615px'}, 70px)`});//'translate(990px, 70px)'});//translate(1615px, 70px)
+                    },7000);
+                    T9 = setTimeout(()=>{
+                        Tutorial.TutorCursor();
+                        $('.t-help-text').html("Clicking on save icon will save music to saved list!");
+                        $('.music-list-ul li').eq(1).find('.save-icon').click();
+                    },11000);
+                    T10 = setTimeout(()=>{
+                        $('.t-help-text').html("Lets go back and see if our list has music now!");
+                        $('.cursorouter').css({'transform':'translate(64px, 12px)'});
+                        T6 = setTimeout(()=>{
+                            Tutorial.TutorCursor();
+                            $('.goto-list').click();
+                            $('.cursorouter').css({'transform':'translate(360px, 166px)'});//translate(1755px, 15px)
+                            setTimeout(()=>{
+                                $('.t-help-text').html("<b style='color:green'>Congratulations!</b> You are now a certified G-Music Operator! Lol!");
+                                $('.tutorial-skipper').html('Close');
+                            },5000);
+                        },3000);
+                    },15000);
+                },
+                skipTutorial : ()=>{
+                    window.location.reload();
+                },
+                HideTutorial:()=>{
+                    $('.tutorial').hide(1000);
+                },
+                TutorCursor : ()=>{
+                    $('.cursorouter').addClass('cursorAnimate');
+                    setTimeout(()=>{
+                        $('.cursorouter').removeClass('cursorAnimate');
+                    },500);
+                }
+            }
+            
+        </script>
+    </scripts>
+</body>
+<style class="gfx"></style>
+<style class="shadows"></style>
+<style>
+    :root {
+        --red: #ff3b30;
+        --green: #4cd964;
+        --blue: #2196f3;
+        --pink: #ff2d55;
+        --yellow: #ffcc00;
+        --orange: #ff9500;
+        --purple: #9c27b0;
+        --deeppurple: #673ab7;
+        --lightblue: #5ac8fa;
+        --teal: #009688;
+        --lime: #00ff5c;
+        --deeporange: #ff6b22;
+        --gray: #8e8e93;
+        --black: #000000;
+    }
+    :root {
+    --theme: rgba(0,0,0);
+    }
+    :root{
+        --alpha: 55%;
+    }
+    .music-meta {
+    opacity: 0.8;
+    color: var(--theme);
+    transition: all 1s ease-in-out;
+    margin: 0px 10px;
+    padding: 10px 20px;
+    border-radius: 32px;
+    box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+    /* max-width: 50px; */
+    display: inline;
+    text-transform: capitalize;
+}
+    
+    ul.saved-music-list-ul {
+        list-style: none;
+        height: 60vh;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        margin: 10px 30px 10px 92px;
+        padding: 0px 0px 20px;
+        transition: all 1s ease-in-out;
+        /* transition: all 1s ease-in-out; */
+        /* border-radius: 63px; */
+        /* background: red; */
+        /* z-index: 99; */
+    }
+    
+    ul.fav-music-list-ul {
+        list-style: none;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        height: 60vh;
+        margin: 10px 30px 10px 92px;
+        padding: 0px 0px 20px;
+        transition: all 1s ease-in-out;
+        /* transition: all 1s ease-in-out; */
+        /* border-radius: 63px; */
+        /* background: red; */
+        /* z-index: 99; */
+    }
+    .save-icon {
+        float: right;
+        margin-right: 22px;
+        font-size: 30px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .playlist-container.row {
+        text-align: center;
+        margin-top: 60px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .playlist-icons {
+        font-size: 75px;
+        transition: all 1s ease-in-out;
+        color: var(--theme);
+        opacity: 0.6;
+    }
+    
+    .playlist-active {
+        transform: matrix(1, 0.5, -2, 0, 0, 17);
+        transition: all 1s ease-in-out;
+    }
+    
+    span.playlist-titles {
+        display: block;
+        text-align: center;
+        transition: all 1s ease-in-out;
+    }
+    
+    @-webkit-keyframes rotating
+    /* Safari and Chrome */
+    
+    {
+        from {
+            -webkit-transform: rotate(0deg);
+            -o-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+        to {
+            -webkit-transform: rotate(360deg);
+            -o-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+    
+    @keyframes rotating {
+        from {
+            -ms-transform: rotate(0deg);
+            -moz-transform: rotate(0deg);
+            -webkit-transform: rotate(0deg);
+            -o-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+        to {
+            -ms-transform: rotate(360deg);
+            -moz-transform: rotate(360deg);
+            -webkit-transform: rotate(360deg);
+            -o-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+    
+    .rotating {
+        -webkit-animation: rotating 2s linear infinite;
+        -moz-animation: rotating 2s linear infinite;
+        -ms-animation: rotating 2s linear infinite;
+        -o-animation: rotating 2s linear infinite;
+        animation: rotating 2s linear infinite;
+    }
+    @-webkit-keyframes scaling
+    /* Safari and Chrome */
+    
+    {
+        from {
+            -webkit-transform: scale(0.5);
+            -o-transform: scale(0.5);
+            transform: scale(0.5);
+        }
+        to {
+            -webkit-transform: scale(1.5);
+            -o-transform: scale(1.5);
+            transform: scale(1.5);
+        }
+    }
+    @keyframes scaling {
+        0%{
+            -ms-transform: scale(0.5);
+            -moz-transform: scale(0.5);
+            -webkit-transform: scale(0.5);
+            -o-transform: scale(0.5);
+            transform: scale(0.5);
+        }
+        25%{
+            -ms-transform: scale(1);
+            -moz-transform: scale(1);
+            -webkit-transform: scale(1);
+            -o-transform: scale(1);
+            transform: scale(1);
+        }
+        50%{
+            -ms-transform: scale(1.5);
+            -moz-transform: scale(1.5);
+            -webkit-transform: scale(1.5);
+            -o-transform: scale(1.5);
+            transform: scale(1.5);
+        }
+        75%{
+            -ms-transform: scale(1);
+            -moz-transform: scale(1);
+            -webkit-transform: scale(1);
+            -o-transform: scale(1);
+            transform: scale(1);
+        }
+        100%{
+            -ms-transform: scale(0.5);
+            -moz-transform: scale(0.5);
+            -webkit-transform: scale(0.5);
+            -o-transform: scale(0.5);
+            transform: scale(0.5);
+        }
+        /* from {
+            -ms-transform: scale(0.5);
+            -moz-transform: scale(0.5);
+            -webkit-transform: scale(0.5);
+            -o-transform: scale(0.5);
+            transform: scale(0.5);
+        }
+        to {
+            -ms-transform: scale(1.5);
+            -moz-transform: scale(1.5);
+            -webkit-transform: scale(1.5);
+            -o-transform: scale(1.5);
+            transform: scale(1.5);
+        } */
+    }
+    .scaling {
+        -webkit-animation: scaling 4s linear infinite;
+        -moz-animation: scaling 4s linear infinite;
+        -ms-animation: scaling 4s linear infinite;
+        -o-animation: scaling 4s linear infinite;
+        animation: scaling 4s linear infinite;
+    }
+    .visualizer {
+        /* background: linear-gradient(56deg, #fb8af5, #49afe7); */
+        width: 100%;
+        height: 100%;
+    }
+    
+    canvas#visualizerX {
+        position: fixed;
+        width: 100%;
+        height: 100vh;
+        /* margin-top: 12.4%; */
+        opacity: 0.5;
+        padding: 0px;
+        transition: all 3s ease-in-out;
+
+    }
+    
+    .player-row {
+        width: 94%;
+        position: absolute;
+        top: 30px;
+        margin: 0 3%;
+        /* border-radius: 100px; */
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+        border-top-left-radius: 34px;
+        border-top-right-radius: 34px;
+        border-bottom-right-radius: 100px;
+        border-bottom-left-radius: 100px;
+        transition: all 1s ease-in-out;
+        transform: scaleY(0);
+    }
+    .song-title{
+        color:var(--theme);
+        transition: all 1s ease-in-out;
+    }
+    .list-row {
+        width: 94%;
+        position: absolute;
+        top: 30px;
+        margin: 0 3%;
+        /* border-radius: 100px; */
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+        border-top-left-radius: 34px;
+        border-top-right-radius: 34px;
+        border-bottom-right-radius: 100px;
+        border-bottom-left-radius: 100px;
+        transition: all 1s ease-in-out;
+        transform: scaleY(0);
+    }
+    
+    /* .main-music-more-details.row {
+        filter: drop-shadow(2px 4px 6px black);
+        transition: all 1s ease-in-out;
+        margin: 30px 100px;
+        border-radius: 20px;
+        padding: 10px;
+        font-size: 18px;
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / 55%);
+    } */
+    .music-details-scroll {
+    height: 70px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 100px;
+    margin: 0px 46px;
+}
+.main-music-more-details {
+    position: absolute;
+    top: 0px;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    /* animation: playmove 60s linear infinite; */
+    width: auto;
+    line-height: 70px;
+    transition: all 0.5s linear;
+    padding: 0px 250px 0px 0px;
+}
+  @keyframes playmove {
+        0% {
+            transform: translate(0, 0);
+        }
+        100% {
+            transform: translate(-100%, 0);
+        }
+    }
+    img.main-music-img {
+        width: 100px;
+        margin-top: -22px;
+        border-radius: 20px;
+    }
+    
+    .main-music-container {
+        text-align: center;
+        transition: all 1s ease-in-out;
+    }
+    
+    span.main-music-title {
+        display: block;
+        font-size: 45px;
+        filter: drop-shadow(2px 4px 6px black);
+        color: var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+    }
+    
+    span.main-music-desc {
+        filter: drop-shadow(2px 4px 6px black);
+        margin-top: 10px;
+        display: block;
+        font-size: 18px;
+        color: var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+    }
+    
+    input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 7px;
+        transition: all 1s ease-in-out;
+    }
+    
+    input[type=range]:focus {
+        outline: none;
+        transition: all 1s ease-in-out;
+    }
+    
+    input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 7.4px;
+        cursor: pointer;
+        background: linear-gradient(45deg, #b300ff61, #014cff6b);
+        border-radius: 100px;
+        filter: drop-shadow(2px 2px 2px grey);
+        transition: all 1s ease-in-out;
+    }
+    
+    input[type=range]::-webkit-slider-thumb {
+        height: 25px;
+        width: 60px;
+        border-radius: 100px;
+        background: linear-gradient(45deg, #0098ff8a, #ff005766);
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -9px;
+        transition: all 1s ease-in-out;
+    }
+    
+    input[type=range]:focus::-webkit-slider-runnable-track {
+        background: linear-gradient(45deg, #b300ff61, #014cff6b);
+        transition: all 1s ease-in-out;
+    }
+    
+    input[type=range]::-moz-range-track {
+        width: 100%;
+        height: 7.4px;
+        cursor: pointer;
+        background: linear-gradient(45deg, #b300ff61, #014cff6b);
+        border-radius: 100px;
+        filter: drop-shadow(2px 4px 2px grey);
+        transition: all 1s ease-in-out;
+    }
+    
+    input[type=range]::-moz-range-thumb {
+        height: 25px;
+        width: 60px;
+        border-radius: 100px;
+        background: linear-gradient(45deg, #0098ff8a, #ff005766);
+        cursor: pointer;
+        margin-top: -9px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .now-playing {
+        background: linear-gradient(45deg, #c300fc3d, #00f9ae24);
+        transition: all 1s ease-in-out;
+    }
+    
+    .col-sm-100.seekbar-container {
+        margin: 0px 0px 35px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .search-progressbar {
+        transition: all 1s ease-in-out;
+        height: 68px;
+    }
+    
+    .list-progressbar {
+        height: 42px!important;
+        margin-top: -36px;
+        background: #ffb0b0;
+        transition: all 1s ease-in-out;
+        left: 4.2%;
+        /* margin: auto 3%; */
+        max-width: 92%;
+    }
+    
+    .progressbar {
+        position: absolute;
+        width: 0%;
+        border-top-right-radius: 100px;
+        border-top-left-radius: 100px;
+        z-index: -1;
+        border-bottom-left-radius: 100px;
+        border-bottom-right-radius: 100px;
+        transition: all 1s ease-in-out;
+        opacity: 0.4;
+        background: var(--theme)!important;
+    }
+    
+    span.song-title {
+        font-size: 22px;
+        padding-left: 0px;
+        transition: all 1s ease-in-out;
+        transition: all 1s ease-in-out;
+    }
+    
+    .s-icon {
+        margin-top: 0px;
+        float: right;
+        margin-right: 20px;
+        font-size: 30px;
+        transition: all 1s ease-in-out;
+    }
+    
+    img.s-img {
+        border-radius: 100px;
+        margin-right: 5px;
+        width: 30px;
+        margin-top: -10px;
+        transition: all 1s ease-in-out;
+    }
+    .material-icons{
+        color : var(--theme)!important;
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+    }
+    span.material-icons.search-btn {
+        position: absolute;
+        font-size: 50px;
+        right: 120px;
+        top: 7px;
+        box-shadow: 2px 1px 5px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 100px;
+        padding: 2px 25px;
+        transition: all 1s ease-in-out;
+    }
+    
+    span.material-icons.goto-player {
+        position: absolute;
+        font-size: 50px;
+        right: 7px;
+        top: 7px;
+        box-shadow: 2px 1px 5px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 100px;
+        padding: 2px 25px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .goto-search {
+        position: absolute;
+        font-size: 50px;
+        right: 7px;
+        top: 7px;
+        box-shadow: 2px 1px 5px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 100px;
+        padding: 2px 25px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .goto-player-from-list {
+        position: absolute;
+        font-size: 50px;
+        left: 7px;
+        top: 7px;
+        box-shadow: 2px 1px 5px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 100px;
+        padding: 2px 25px;
+        z-index: 1;
+        transition: all 1s ease-in-out;
+    }
+    
+    .goto-list {
+        position: absolute;
+        font-size: 50px;
+        left: 7px;
+        top: 7px;
+        box-shadow: 2px 1px 5px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 100px;
+        padding: 2px 25px;
+        z-index: 1;
+        transition: all 1s ease-in-out;
+    }
+    
+    .main-controller {
+        /* background: linear-gradient(56deg, #f16bd8, #40c1b480); */
+        height: 40vh;
+        position: absolute;
+        width: 100%;
+        bottom: 0px;
+        left: 0px;
+        filter: drop-shadow(0px -9px 31px black);
+        transition: all 1s ease-in-out;
+    }
+    
+    .row.controller-row {
+        text-align: center;
+        margin: 20px 100px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .control-btn {
+        background: #ff000000;
+        height: 88%;
+        transition: all 1s ease-in-out;
+    }
+    
+    .control-btn {
+        background: #ff000000;
+        height: 78%!important;
+    }
+    
+    .main-play {
+        /* background: red; */
+        height: 200px;
+        width: 200px;
+        border-radius: 100px;
+        text-align: center;
+        margin: 0 auto;
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+        cursor: pointer;
+        transition: all 1s ease-in-out;
+    }
+    
+    .main-prev {
+        /* background: red; */
+        height: 120px;
+        width: 120px;
+        border-radius: 100px;
+        text-align: center;
+        margin: 0 auto;
+        transition: all 1s ease-in-out;
+    }
+    
+    .main-next {
+        /* background: red; */
+        height: 120px;
+        width: 120px;
+        border-radius: 100px;
+        text-align: center;
+        margin: 0 auto;
+        transition: all 1s ease-in-out;
+    }
+    
+    .main-repeat {
+        /* background: red; */
+        height: 70px;
+        width: 70px;
+        border-radius: 100px;
+        text-align: center;
+        margin: 0 auto;
+        transition: all 1s ease-in-out;
+    }
+    
+    .main-shuffle {
+        /* background: red; */
+        height: 70px;
+        width: 70px;
+        border-radius: 100px;
+        text-align: center;
+        margin: 0 auto;
+        transition: all 1s ease-in-out;
+    }
+    
+    .sbs {
+        margin-top: 35px;
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+        cursor: pointer;
+        transition: all 1s ease-in-out;
+    }
+    
+    .lbs {
+        /* margin-top: 57px; */
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+        cursor: pointer;
+        transition: all 1s ease-in-out;
+    }
+    
+    .sub-sub-icon {
+        font-size: 50px;
+        margin-top: 9px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .sub-icon {
+        font-size: 100px;
+        margin-top: 9px;
+        transition: all 1s ease-in-out;
+    }
+    
+    .main-icon {
+        font-size: 200px;
+        transition: all 1s ease-in-out;
+    }
+    
+    body {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        font-family: 'Alata', 'sans-serif';
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        transition: all 1s ease-in-out;
+        height: 100vh;
+    overflow-y: hidden;
+        /* Firefox */
+    }
+    
+    body::-webkit-scrollbar {
+        display: none;
+    }
+    
+    ul.saved-music-list-ul::-webkit-scrollbar {
+        display: none;
+    }
+    
+    ul.saved-music-list-ul {
+        scrollbar-width: none;
+    }
+    
+    ul.fav-music-list-ul::-webkit-scrollbar {
+        display: none;
+    }
+    
+    ul.fav-music-list-ul {
+        scrollbar-width: none;
+    }
+    
+    .search-row {
+        width: 94%;
+        position: absolute;
+        top: 30px;
+        margin: 0 3%;
+        border-radius: 100px;
+        box-shadow: 2px 1px 10px 3px rgb(0 0 0 / var(--alpha));
+        transition: all 1s ease-in-out;
+    }
+    
+    .search-expanded {
+        border-top-right-radius: 32px!important;
+        border-top-left-radius: 32px!important;
+        transition: all 1s ease-in-out;
+    }
+    
+    input.main-search {
+    width: 100%;
+    border-radius: 100px;
+    border: none;
+    padding: 5px 130px;
+    font-size: 40px;
+    background: transparent;
+    color: var(--theme);
+    transition: all 1s ease-in-out;
+    z-index: 2;
+}
+    
+ul.music-list-ul {
+    list-style: none;
+    margin-top: -67px;
+    transition: all 1s ease-in-out;
+    max-height: 50vh!important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: 38px 84px 20px;
+}
+    .from-search li:first {
+        margin-top: 10px!important;
+        transition: all 1s ease-in-out;
+    }
+    .music-list-ul li:first {
+        margin-top: 10px!important;
+        transition: all 1s ease-in-out;
+    }
+    ul.saved-music-list-ul {
+        list-style: none;
+        transition: all 1s ease-in-out;
+    }
+    
+    li.li-music {
+        width: 94%;
+        margin: 5px 3% 0 2%;
+        padding: 5px 10px;
+        border-radius: 100px;
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+        transition: all 1s ease-in-out;
+    }
+   
+    li.safe-padding {
+    height: 30px;
+}
+    galib-raza.strict-branding {
+        position: absolute;
+        padding-bottom: 15px;
+        padding-left: 15px;
+        padding-right: 20px;
+        padding-top: 20px;
+        border-top-right-radius: 74px;
+        color: white;
+        bottom: 0px;
+        left: 0px;
+        background: var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+        z-index: 9;
+    }
+    ::placeholder { 
+        color:  var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+    }
+
+    :-ms-input-placeholder {
+        color:  var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+    }
+
+    ::-ms-input-placeholder {
+        color:  var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+    }
+    section.main-section {
+        /* height: 20%!important; */
+        /* display: list-item; */
+        transition: all 2s ease-in-out;
+        /* transform: scale(0.5)translate(-50%, -50%); */
+    }
+    galib-raza.superSettings {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        padding-bottom: 15px;
+        padding-left: 30px;
+        padding-right: 15px;
+        padding-top: 20px;
+        border-top-left-radius: 74px;
+        color: white;
+        background: var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+        z-index: 2;
+        color: white!important;
+    }
+    .super-settings {
+        color: white!important;
+    }
+    .min-max-eqScreen {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        padding-bottom: 15px;
+        padding-left: 30px;
+        padding-right: 15px;
+        padding-top: 20px;
+        border-top-left-radius: 74px;
+        color: white;
+        background: var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+        z-index: 2;
+        color: white!important;
+    }
+    .min-max-customScreen{
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        padding-bottom: 15px;
+        padding-left: 30px;
+        padding-right: 15px;
+        padding-top: 20px;
+        border-top-left-radius: 74px;
+        color: white;
+        background: var(--theme);
+        opacity: 0.6;
+        transition: all 1s ease-in-out;
+        z-index: 2;
+        color: white!important;
+    }
+    .super-settings-1 {
+        color: white!important;
+    }
+    .super-settings-2 {
+        color: white!important;
+    }
+    /* section.setting-section {
+    position: absolute;
+    top: 0;
+    left: 51%;
+    width: 48%;
+    height: 50%;
+    transform: scaleY(0) translate(100%,100%);
+    transition: all 2s ease-in-out;
+    
+    padding: 10px;
+    } */
+    section.setting-section {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: scaleY(0) translate(100%,100%);
+    transition: all 2s ease-in-out;
+    padding: 25px 40px 0px;
+    transform: scaleY(0);
+}
+    .playback-setting.row {
+        /* background: var(--theme); */
+        margin-top: 2px;
+        font-size: 32px;
+        padding: 2px 0px;
+        border-radius: 114px;
+        color: var(--theme);
+        text-align: center;
+        opacity: 0.6;
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    }
+    .slow-playback {
+        font-size: 44px;
+        transform: scale(1.3);
+    }
+    .fast-playback {
+        font-size: 44px;
+        transform: scale(1.3);
+    }
+    .reset-playback {
+        font-size: 30px;
+        transform: scale(1.3);
+    }
+    .playback-setting.col-sm-2 {
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 73px;
+        margin-right: 10px;
+    }
+    .playback-setting.col-sm-5 {
+        text-align: left;
+    }
+
+    span.playback-speed-value {
+        color: white;
+        border-radius: 100px;
+        padding: 0px 3%;
+        font-size: 32px;
+        opacity: 0.6;
+    }
+
+    .sooper-alert {
+        position: absolute;
+        background: linear-gradient(335deg, #0098ff96, var(--theme));
+        top: 0;
+        /* left: 47%; */
+        width: 100%;
+        height: 100%;
+        z-index: 99;
+        text-align: center;
+        opacity: 0;
+        transition: all 1s ease-in-out;
+        transition: all 1s ease-in-out;
+        transform: scaleY(0);
+    }
+    .alert-inner {
+        position: fixed;
+        top: 40%;
+        left: 35%;
+        background: var(--theme);
+        width: 30%;
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 23px;
+        opacity: 1;
+    }
+    .sooper-alert-head {
+        text-align: center;
+        color: white;
+        font-size: 25px;
+        padding: 15px 20px;
+        border-bottom-style: solid;
+        border-bottom-color: white;
+        border-bottom-width: 1px;
+    }
+    .alert-action-btn {
+    font-size: 25px;
+    padding: 8px;
+    color: white;
+    }
+    .splashscreen {
+        background: linear-gradient(45deg, #ff38fb, #67a9f8);
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100;
+        text-align: center;
+        transition: all 1s ease-in-out;
+    }
+    pos {
+        display: block;
+        font-size: 50px;
+        margin-top: 12%;
+        font-weight: 900;
+        filter: drop-shadow(2px 4px 6px black);
+        color: #c6c6c6;
+    }
+    credit {
+        display: block;
+        margin-top: 2%;
+        color: #e2e2e2;
+        filter: drop-shadow(2px 4px 6px black);
+    }
+
+
+    input[type=range].eq-filter-bars {
+        transform: rotateZ(-90deg);
+        margin-top: 100px;
+    }
+    .col-sm-3.eq-bars {
+    transform: scale(0.8);
+    padding: 100px 0px;
+    margin: 0px 0px;
+    transition: all 1s ease-in-out;
+}
+    input[type=range].eq-gain-bars {
+        transform: scale(0.8);
+    }
+    .gain-node-row.row {
+        transform: scale(0.8);
+        margin-top: 200px;
+        margin-bottom: 16px;
+    }
+    .eq-settings.row {
+        padding: 10px;
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+        margin-top: 14px;
+        border-radius: 30px;
+        padding-bottom: 50px;
+    }
+    .enable-eq-title {
+        font-size: 32px;
+        color: var(--theme);
+        opacity: 0.6;
+        border-bottom-style: solid;
+        border-bottom-color: var(--theme);
+        border-bottom-width: 1px;
+        padding-left: 15px;
+        /* padding: 10px; */
+        /* margin-bottom: 10px; */
+        padding-bottom: 12px;
+    }
+    /* Rounded sliders */
+    .switch {
+        position: absolute;
+        display: inline-block;
+        width: 100px;
+        height: 53px;
+        margin-left:20px;
+    }
+
+    .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+    }
+
+    .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    }
+
+    .slider:before {
+    position: absolute;
+    content: "";
+    height: 46px;
+    width: 46px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    }
+
+    input:checked + .slider {
+    background-color:  var(--theme);;
+    }
+
+    input:focus + .slider {
+    box-shadow: 0 0 1px  var(--theme);
+    }
+
+    input:checked + .slider:before {
+    -webkit-transform: translateX(46px);
+    -ms-transform: translateX(46px);
+    transform: translateX(46px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+    border-radius: 34px;
+    }
+
+    .slider.round:before {
+    border-radius: 50%;
+    }
+    label {
+        display: inline-block;
+        max-width: 100%;
+        /* margin-bottom: 5px; */
+        font-weight: 700;
+        margin-top: 0px;
+        margin-left: 0px;
+    }
+    .playback-speed-title {
+        text-align: left;
+        padding-left: 50px;
+    }
+
+    input.eq-pan-bars {
+        margin-top: 20px;
+        /* transform: scale(0.8); */
+        padding-left: 110px;
+        transform: scaleY(0.8);
+    }
+    .pan-val-col{
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 73px;
+        background: var(--theme);
+        transition:all 1s ease-in-out
+    }
+    span.playback-pan-value{
+        color: white;
+        border-radius: 100px;
+        padding: 0px 3%;
+        font-size: 32px;
+        opacity: 0.6;
+    }
+    /* .eq-presets-block {
+        display: inline-block;
+        width:55%;
+        height: 39px;
+        margin-left: 105px;
+        overflow-y: hidden;
+        overflow-x: scroll;
+        margin-top: -2px;
+        position: absolute;
+        border-radius: 73px;
+        background: red;
+        padding-top: 2px;
+    } */
+    .eq-presets-block {
+        display: inline-block;
+        width: 96%;
+        height: 60px;
+        overflow-y: hidden;
+        overflow-x: scroll;
+        margin-top: 6px;
+        /* position: absolute; */
+        border-radius: 73px;
+        /* background: red; */
+        padding-top: 4px;
+        font-size: 18px;
+        /* margin: 0 auto; */
+        margin-left: 2%;
+    }
+    .eq-presets-row.row {
+        display: flex;
+        padding: 0px 20px;
+    }
+    .eq-presets-block::-webkit-scrollbar {
+        display: none;
+    }
+    ul::-webkit-scrollbar{
+        display: none;
+    }
+    .eq-preset {
+        display: inline-block;
+        min-width: 200px;
+        text-align: center;
+        box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+        border-radius: 73px;
+        margin: 2px 5px;
+        transition: all 1s ease-in-out;
+        font-size: 30px;
+        padding: 2px;
+    }
+    .preset-nav-left {
+    position: fixed;
+    transform: scale(3);
+    margin-top: 8px;
+    margin-left: -42px;
+    font-size: 36px;
+}
+.preset-nav-right {
+    position: fixed;
+    transform: scale(3);
+    margin-top: -42px;
+    /* margin-right: -1px; */
+    right: 42px;
+    font-size: 36px;
+}
+    .eq-preset:last-child{
+        margin-right:20px;
+    }
+    span.ghost-preset {
+    display: inline-flex;
+    min-width: 50px;
+    font-size: 30px;
+}
+    .preset-active {
+    background: var(--theme);
+    color: white;
+}
+b.hd {
+    font-size: 10px;
+    color: #ffa000;
+    position: absolute;
+    margin-top: 4px;
+}
+span.search-result-count {
+    position: absolute;
+    font-size: 30px;
+    right: 25px;
+    top: 100px;
+    font-weight: 900;
+    opacity: 0.8;
+    color: var(--theme);
+    display:none;
+}
+i.song-subs {
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 200!important;
+    margin-left: 20px;
+}
+.album-icon {
+    transform: scale(0.8) translate(0px,8px);
+}
+.import-playlist-div {
+    margin: 25px 60px 25px 100px;
+    text-align: center;
+}
+.imp-exp-cols {
+    box-shadow: 20px -13px 0px 3px rgb(0 0 0 / var(--alpha));
+    padding: 25px;
+    border-radius: 54px;
+    transform: scale(0.9)skew(359deg, 19deg);
+    /* margin: 5px; */
+    font-size: 20px;
+}
+.icons-exp-imp {
+    font-size: 120px;
+    /* transform: translate(10px, 10px); */
+    display: block;
+}
+.local-exp-imp-button {
+    display: block;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    padding: 5px;
+    border-radius: 15px;
+    margin: 5px 30px;
+}
+.exp-imp-input {
+    display: block;
+    width: 84%;
+    margin: 10px 30px;
+    border: solid 0px;
+    border-radius: 14px;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    padding: 5px 15px;
+}
+.exp-imp-actions {
+    transition: all 1s ease-in-out;
+    transform: rotateX(90deg);
+    display: table-column;
+}
+canvas#visualizer-min {
+    width: inherit;
+    position: absolute;
+    margin-top: 49px;
+    /* border-radius: 43px; */
+    /* height: inherit; */
+    transform: scale(4);
+    opacity: 0.2;
+    pointer-events: none;
+}
+span.loc-imported-preview {
+    display: block;
+    border-bottom: 1px solid #80808024;
+}
+.local-import-confirmation {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    max-height: 45vh;
+}
+.local-import-confirmation::-webkit-scrollbar{
+    display: none;
+}
+span.cancel-import-on-preview {
+    position: absolute;
+    right: 35px;
+    margin-top: -32px;
+    transform: scale(1.5);
+    border-radius: 100px;
+    padding: 0px 11px 3px;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+}
+span.confirm-import-on-preview {
+    display: block;
+    position: absolute;
+    background: #00bf00;
+    color: white;
+    padding: 3px 15px;
+    border-radius: 15px;
+    bottom: 23px;
+    left: 26%;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+}
+.eq-stats.row {
+    /* display: inline; */
+    width: 60%;
+    position: absolute;
+    right: 60px;
+    font-size: 19px;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    text-align: center;
+    padding: 10px;
+    border-radius: 16px;
+    top: 100px;
+}
+performance-stats {
+    /* background: #d9000057; */
+    width: 100vw;
+    display: block;
+    text-align: center;
+    opacity: 0.9;
+    padding: 5px;
+}
+.battery-icon {
+    position: absolute;
+    left: 15%;
+    font-size: 22px;
+    transform: rotate(90deg)scale(1.7);
+}
+.performance-icon {
+    position: absolute;
+    right: 15%;
+    font-size: 22px;
+    transform: scale(1.4);
+    font-weight: 900;
+}
+.battery-text{
+    position: absolute;
+    left: 17.5%;
+    font-weight: 900;
+}
+.performance-text{
+    position: absolute;
+    right: 17.5%;
+    font-weight: 900;
+}
+.LegendMode-lol {
+    font-size: 30px;
+    /* margin: 80px 0%; */
+    text-align: center;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    transform: scaleX(0);
+    transition: all 1s ease-in-out;
+    position: absolute;
+    padding: 2% 20px;
+    border-radius: 20px;
+    width: 92%;
+    margin-top: 80px;
+    margin-left: 2%;
+}
+input.eq-direct-value {
+    border-radius: 20px;
+    border: solid 5px var(--theme);
+    opacity: 0.8;
+    text-align: center;
+    width: 100%;
+}
+.eq-custom > div{
+    color : var(--theme);
+    margin-bottom: 5px;
+}
+span.hd-visual {
+    font-size: 160px;
+    position: fixed;
+    left: 0;
+    t: -81%;
+    font-weight: 900;
+    text-align: center;
+    width: 100%;
+    color: #000000;
+    opacity: 0.1;
+    margin: 0 auto;
+    margin-top: 35px;
+    font-variant: petite-caps;
+    pointer-events: none;
+}
+span.hd-visual-x {
+    font-size: 121px;
+    position: fixed;
+    left: 0;
+    font-weight: 900;
+    text-align: center;
+    width: 100%;
+    color: #000000;
+    opacity: 0.1;
+    margin: 0 auto;
+    margin-top: 250px;
+    font-variant: petite-caps;
+    /* bottom: -115px; */
+    pointer-events: none;
+}
+.currently-playing-bg {
+    font-size: 15em;
+    text-align: center;
+    opacity: 0.2;
+
+    position: fixed;
+    width: 100vw;
+    height: 90vh;
+    /* margin-top: 12.4%; */
+    transition: all 5s ease-in-out;
+    /* white-space: pre; */
+    text-overflow: ellipsis;
+    clear: both;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0% 5%;
+    line-height: 90vh;
+    color: var(--theme);
+    transform:'none'
+}
+img.meta-img {
+    width: 32px;
+    border-radius: 100px;
+    margin-left: 21px;
+    margin-top: -6px;
+    transform: scale(1.8);
+}
+.cloud-playleest {
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    border-radius: 18px;
+    margin-bottom: 5px;
+    padding: 2px;
+}
+.uploaded-public-playlists {
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 5px;
+    font-size: 17px;
+}
+.uploaded-public-playlists::-webkit-scrollbar{
+    display: none;
+}
+
+.browsing-playlist-preview {
+    max-height: 280px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: 5px;
+    font-size: 17px;
+}
+.uploaded-playlist-contents {
+    border-bottom: solid 1px #cacaca;
+}
+.uploaded-playlist-contents-y {
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    border-radius: 20px;
+    /* line-height: 20px; */
+    position: sticky;
+    width: 50%;
+    top: 0;
+    background: #abffab;
+    left: 0;
+    display: inline;
+    padding: 0px 10px;
+}
+.uploaded-playlist-contents-x {
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    border-radius: 20px;
+    /* line-height: 20px; */
+    position: sticky;
+    width: 50%;
+    top: 0;
+    display: inline;
+    left: 0;
+    padding: 0px 10px;
+    margin-right: 10px;
+}
+.browsing-playlist-preview::-webkit-scrollbar {
+    display: none;
+}
+section.customise-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: all 2s ease-in-out;
+    padding: 25px 40px 0px;
+    transform: scaleX(0) translate(100%, 100%);
+}
+.cust-section {
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    font-size: 30px;
+    padding: 5px 10px;
+    border-radius: 36px;
+    margin-bottom: 15px;
+    opacity: 0.6;
+}
+option {
+    border-radius: 30px;
+    background: var(--theme);
+    margin-bottom: 5px;
+    color: white;
+    padding: 15px!important;
+    border-radius: 30px;
+    opacity: 0.5;
+}
+select.input-select {
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    padding: 4px;
+    color: var(--theme);
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+    transition: all 1s ease-in-out;
+    
+}
+.tutorial {
+    position: absolute;
+    background: #42424242;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99;
+    top: 0;
+    left: 0;
+    transition: all 1.5s ease-in-out;
+}
+.cursorouter {
+    background: #ffffff6b;
+    width: 100px;
+    height: 100px;
+    z-index: 100;
+    position: absolute;
+    border-radius: 100px;
+    /* border: 2px solid; */
+    transition: all 1.5s ease-in-out;
+    box-shadow: 1px 2px 55px 3px rgb(0 0 0);
+}
+.tutorial-skipper {
+    background: #ffffff7d;
+    width: 100%;
+    text-align: center;
+    /* position: absolute; */
+    /* top: 30vh; */
+    /* left: -44px; */
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 45px;
+    border: 2px solid;
+    margin-top: 10px;
+}
+.t-help {
+    position: absolute;
+    top: 16vh;
+    width: 200px;
+    background: #ffffff;
+    text-align: center;
+    font-size: 20px;
+    margin: 0 3%;
+    padding: 16px 16px 0px 16px;
+    border-radius: 38px;
+    left: -58px;
+    box-shadow: 1px 1px 3px 3px rgb(0 0 0 / var(--alpha));
+}
+.cursorAnimate{
+    width: 10px!important;
+    height: 10px!important;
+}
+</style>
