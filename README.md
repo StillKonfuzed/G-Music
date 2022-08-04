@@ -43,6 +43,6 @@ This is the most advanced music player as far as i have seen on the web!
 >Works 80% with mozilla and Edge/Opera.  
 >Mobile Version for chrome is in progress will be built in react.  
 
-**NOTE : Use it only for personal use and do not distribute.**
+**NOTE : Use it only for personal use and do not distribute.** 
 
 
