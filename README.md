@@ -45,6 +45,8 @@ This is the most advanced music player as far as i have seen on the web!
 
 **NOTE : Use it only for personal use and do not distribute.** 
 ![image](https://user-images.githubusercontent.com/17314236/182872485-34b626e3-0e4a-4a25-8b8d-8d1e16e3a0dc.png)
+![image](https://user-images.githubusercontent.com/17314236/182872830-6d5d99a7-6920-461e-a9bf-6f0024f033a9.png)
+
 
 ![image](https://user-images.githubusercontent.com/17314236/182872324-5da4fa12-f93c-49fe-aae6-e3d0be1475ab.png)
 
