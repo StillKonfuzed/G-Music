@@ -1,5 +1,5 @@
 # G-Music
-G-Music pushes the limits of web audio player to extremes by using the Web Audio API and also comes with butter fluid animation and next-gen playlist management system.
+G-Music pushes the limits of web audio player to extremes by using the Web Audio API and also comes with butter fluid animation/bvisualiser and next-gen playlist management system.
 Built on a single html file, the HTML file can run on `FILE://` protocol by bypassing crossorigin errors using a proxy server. I cannot type here the source of music,
 if you are average dev you will find it out soon. 
 
@@ -46,9 +46,9 @@ This is the most advanced music player as far as i have seen on the web!
 **NOTE : Use it only for personal use and do not distribute.** 
 ![image](https://user-images.githubusercontent.com/17314236/182872485-34b626e3-0e4a-4a25-8b8d-8d1e16e3a0dc.png)
 ![image](https://user-images.githubusercontent.com/17314236/182872830-6d5d99a7-6920-461e-a9bf-6f0024f033a9.png)
+![image](https://user-images.githubusercontent.com/17314236/182873206-3b3a2c09-d8ea-4ca5-9b49-457c04076a2e.png)
+![image](https://user-images.githubusercontent.com/17314236/182873340-c20ef944-d495-4e7d-8512-a97a6c4a1a17.png)
 
-
-![image](https://user-images.githubusercontent.com/17314236/182872324-5da4fa12-f93c-49fe-aae6-e3d0be1475ab.png)
 
 
 
