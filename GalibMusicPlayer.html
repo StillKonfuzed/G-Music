@@ -444,9 +444,14 @@
         </script>
         <script class="Galib-Alert-Handler" type="text/javascript">
             $(document).on('click','.action-yes',function(){
-                $('.sooper-alert').css({'transform':'scaleY(0)'});
-                $('.collapse-on-alert').attr('style',$beforeAlert);
-                $('.setting-section').attr('style',$settingsBeforeAlert);
+                if($(this).data('yescommand') === 'showplayer'){
+                    $('.sooper-alert').css({'transform':'scaleY(0)'});
+                    $(this).data('yescommand','');
+                }else{
+                    $('.sooper-alert').css({'transform':'scaleY(0)'});
+                    $('.collapse-on-alert').attr('style',$beforeAlert);
+                    $('.setting-section').attr('style',$settingsBeforeAlert);
+                }
             });
             $(document).on('click','.action-no',function(){
                 $('.sooper-alert').css({'transform':'scaleY(0)'});
@@ -570,7 +575,7 @@
                     reader.readAsText(file, "UTF-8");
                     reader.onload = function (evt) {
                         if(evt.target.result.length < 1){
-                            Notify("Selected file is empty! Thanks for wasting my time.","player");
+                            Alert.Notify("Selected file is empty! Thanks for wasting my time.","player");
                         }else{
                             ImportData = JSON.parse(evt.target.result); 
                             $('.import-file-name').data('impjson',evt.target.result);
@@ -1857,7 +1862,8 @@
                         if(typeof($brand) !== "undefined" && $brand?.brand === "Google Chrome" && navigator?.userAgentData?.mobile === false){ 
                             console.log(true);
                         }else{ 
-                            Alert.Notify("This music player is only 100% compatible with Chromium based browsers! Others can play music but some features will not work as intended!","player");
+                            Alert.Notify("This music player is only 100% compatible with Chromium based browsers! Others can play music but some features will not work as intended!",'start');
+                            $('.action-yes').data('yescommand','showplayer');
                         }
                         
                     }
@@ -1995,6 +2001,8 @@
                             $('.setting-section').css({'transform':'scale(2) translate(10%, 23%)'});
                         }else if(From === "player"){
                             $('.collapse-on-alert').css({'transform':'scaleY(0.3)scaleX(0.3)translateY(-95%)'});
+                        }else if(From === "start"){
+                            //$('.collapse-on-alert').css({'transform':'scaleY(0.3)scaleX(0.3)translateY(-95%)'});
                         }
                     }
                 }
