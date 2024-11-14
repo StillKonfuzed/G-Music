@@ -24,17 +24,13 @@
         if (localStorage.getItem(SavedStorage) && localStorage.getItem(SavedStorage).length > 1) {
             SavedJson = JSON.parse(localStorage.getItem(SavedStorage));
         } else {
-            localStorage.setItem(SavedStorage, `[{"Id":1,"Name":"All We Know","MediaUrl":"aDftG1D2","IsFav":false,"CreatedOn":"31/03/2022 00:10"},{"Id":21,"Name":"Alone","MediaUrl":"mlOelmXY","IsFav":false,"CreatedOn":"08/04/2022 18:01"},{"Id":9,"Name":"Animals","MediaUrl":"_oONnN9B","IsFav":false,"CreatedOn":"08/04/2022 17:48"},{"Id":5,"Name":"Cheap Thrills","MediaUrl":"iWt8op78","IsFav":true,"CreatedOn":"08/04/2022 17:46"},{"Id":15,"Name":"Counting Stars","MediaUrl":"ddiNyJMU","IsFav":true,"CreatedOn":"08/04/2022 17:56"},{"Id":3,"Name":"Criminal","MediaUrl":"wManRgbw","IsFav":true,"CreatedOn":"30/03/2022 23:18"},{"Id":18,"Name":"Darkside","MediaUrl":"Y39HW52b","IsFav":true,"CreatedOn":"08/04/2022 17:57"},{"Id":29,"Name":"Demons","MediaUrl":"k7KSsn7U","IsFav":true,"CreatedOn":"08/04/2022 18:06"},{"Id":22,"Name":"Faded","MediaUrl":"1xqHQw3J","IsFav":true,"CreatedOn":"08/04/2022 18:01"},{"Id":17,"Name":"Heathens","MediaUrl":"bggqv2C8","IsFav":false,"CreatedOn":"08/04/2022 17:57"},{"Id":3,"Name":"Ignite","MediaUrl":"QW2Cc9f_","IsFav":false,"CreatedOn":"08/04/2022 17:06"},{"Id":33,"Name":"Mirrors","MediaUrl":"WB9k4nPY","IsFav":true,"CreatedOn":"20/04/2022 16:34"},{"Id":23,"Name":"Stressed Out","MediaUrl":"WKArJcdw","IsFav":true,"CreatedOn":"08/04/2022 18:01"},{"Id":16,"Name":"The Greatest","MediaUrl":"URuxt8q-","IsFav":true,"CreatedOn":"08/04/2022 17:56"},{"Id":34,"Name":"Titanium (feat. Sia)","MediaUrl":"ZZTLkDlS","IsFav":false,"CreatedOn":"30/04/2022 04:21"},{"Id":31,"Name":"Unstoppable","MediaUrl":"t5e4VTsk","IsFav":false,"CreatedOn":"11/04/2022 23:20"},{"Id":27,"Name":"Whatever It Takes","MediaUrl":"sZULdFlE","IsFav":true,"CreatedOn":"08/04/2022 18:05"}]`);
+            localStorage.setItem(SavedStorage, `[{"Id":1,"Name":"All We Know","MediaUrl":"aDftG1D2","IsFav":false,"CreatedOn":"31/03/2022 00:10"},{"Id":21,"Name":"Alone","MediaUrl":"mlOelmXY","IsFav":false,"CreatedOn":"08/04/2022 18:01"},{"Id":9,"Name":"Animals","MediaUrl":"_oONnN9B","IsFav":false,"CreatedOn":"08/04/2022 17:48"},{"Id":5,"Name":"Cheap Thrills","MediaUrl":"iWt8op78","IsFav":true,"CreatedOn":"08/04/2022 17:46"},{"Id":15,"Name":"Counting Stars","MediaUrl":"ddiNyJMU","IsFav":true,"CreatedOn":"08/04/2022 17:56"},{"Id":18,"Name":"Darkside","MediaUrl":"Y39HW52b","IsFav":true,"CreatedOn":"08/04/2022 17:57"},{"Id":29,"Name":"Demons","MediaUrl":"k7KSsn7U","IsFav":true,"CreatedOn":"08/04/2022 18:06"},{"Id":22,"Name":"Faded","MediaUrl":"1xqHQw3J","IsFav":true,"CreatedOn":"08/04/2022 18:01"},{"Id":17,"Name":"Heathens","MediaUrl":"bggqv2C8","IsFav":false,"CreatedOn":"08/04/2022 17:57"},{"Id":3,"Name":"Ignite","MediaUrl":"QW2Cc9f_","IsFav":false,"CreatedOn":"08/04/2022 17:06"},{"Id":33,"Name":"Mirrors","MediaUrl":"WB9k4nPY","IsFav":true,"CreatedOn":"20/04/2022 16:34"},{"Id":23,"Name":"Stressed Out","MediaUrl":"WKArJcdw","IsFav":true,"CreatedOn":"08/04/2022 18:01"},{"Id":16,"Name":"The Greatest","MediaUrl":"URuxt8q-","IsFav":true,"CreatedOn":"08/04/2022 17:56"},{"Id":34,"Name":"Titanium (feat. Sia)","MediaUrl":"ZZTLkDlS","IsFav":false,"CreatedOn":"30/04/2022 04:21"},{"Id":31,"Name":"Unstoppable","MediaUrl":"t5e4VTsk","IsFav":false,"CreatedOn":"11/04/2022 23:20"},{"Id":27,"Name":"Whatever It Takes","MediaUrl":"sZULdFlE","IsFav":true,"CreatedOn":"08/04/2022 18:05"}]`);
             SavedJson = [];
         }
     </script>
 </head>
-<!-- DESKTOP VERSION BUILT IN REACT -->
-<!-- <body class="mobile-body">
-    
-</body> -->
 
-<!-- DESKTOP VERSION BUILT IN JQUERY -->
+<!-- DESKTOP VERSION -->
 <body class="desktop-body">
     <!-- DO NOT MODIFY | If you modify and remove my branding it will stop working | Modify without touching the branding-->
     <!-- To developers who are inspecting : This is a single page app with the music decryption happening serverside : Just preventing further misuses -->
@@ -370,10 +366,10 @@
     </div>
     <!-- JS LIBS -->
     <scripts class="js-libraries">
-        <!-- DO NOT MODIFY | IF YOU TRY MODIFY, IF you remove branding , this will stop working -->
+        <!-- DO NOT MODIFY | IF you remove branding , this will stop working -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous" type="text/javascript"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" type="text/javascript"></script>
-        <script src="https://stillkonfuzed.com/Music/Assets/Crypto.js" type="text/javascript"></script> <!-- for decoding the jio saavn links-->
+        <script src="https://stillkonfuzed.com/Music/Assets/Crypto.js" type="text/javascript"></script> <!-- for decoding the links-->
         <script src="https://stillkonfuzed.com/Music/Assets/ECB.js" type="text/javascript"></script>
         <script src="https://stillkonfuzed.com/Music/Assets/Wave.js" type="text/javascript"></script>
 
@@ -1517,7 +1513,7 @@
                             }
                             var decUrl = decryptByDES($playUrl, $gkey);
                             $("#player")[0].autoplay = true;
-                            $('#player').attr("src",PROXY+decUrl);
+                            $('#player').attr("src",decUrl);//PROXY+
                             MusicControls.Play();
                             player.playbackRate =  parseFloat($('.playback-speed-value').html())
                         });
@@ -1572,13 +1568,13 @@
                    $(searchEvt).addClass('rotating');
                    $(searchEvt).text('autorenew');
                    $('.music-list-ul').html("");
-                    if (musicSearch.length > 1) {
-                        $.get(PROXY+"https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&includeMetaTags=1&query=" + musicSearch, (ms) => {
+                    if (musicSearch.length > 1) {//PROXY`https://stillkonfuzed.com/Music/search.php?musicName=${musicSearch}` 
+                        $.get(PROXY+`https://www.jiosaavn.com/api.php?p=1&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=20&__call=search.getResults`, (ms) => {
                             $(searchEvt).text('cancel');
                             $(searchEvt).removeClass('rotating');
                             $('.search-row').addClass('search-expanded');
-                            ms = JSON.parse(ms);
-                            $songs = ms.songs.data;
+                            mss = JSON.parse(ms);
+                            $songs = mss.results;
                             $('.music-list-ul').append(`<li class="safe-padding"></li>`);
                             if ($songs.length < 1) {
                                 $searchHtml = `<li data-mediaUrl="" class="li-music" >
@@ -1596,7 +1592,7 @@
                                     $searchHtml = `<li data-mediaUrl="${songID}" class="li-music online-music from-search"  data-mediatitle="${song.title}">
                                                         <div class="item-title"><img class="s-img" src="${song.image}" width="50px"/>
                                                             <span class="song-title">${song.title} 
-                                                                <i class="song-subs">${typeof(song.description) === undefined ? "": `<span class="icon material-icons album-icon">album</span>` +song.description}</i>
+                                                                <i class="song-subs"><span class="icon material-icons album-icon">album</span>${song.subtitle} | ${song.more_info?.album}</i>
                                                             </span>
                                                             <span class="icon material-icons save-icon">save</span>
                                                             <!--<span class="icon material-icons s-icon">cloud</span>-->
@@ -1604,50 +1600,10 @@
                                                     </li>`;
                                     $('.music-list-ul').append($searchHtml);
                                 });
-                                $.get(PROXY+`https://www.jiosaavn.com/api.php?p=1&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&__call=search.getResults`,(rs)=>{
-                                    rs = JSON.parse(rs);
-                                    $extraSearch = rs.results;
-                                    if($extraSearch.length > 0){
-                                        $pages = rs.total / 40;
-                                        $('.search-result-count').html(rs.total + "<br> Results").show(1000);
-                                        $extraSearch.map((m)=>{
-                                            $searchExtraHtml = `<li data-mediaUrl="${m.id}" class="li-music online-music from-search"  data-mediatitle="${m.title}">
-                                                                    <div class="item-title"><img class="s-img" src="${m.image}" width="50px"/>
-                                                                        <span class="song-title">${m.title} 
-                                                                            <i class="song-subs">${typeof(m.subtitle) === undefined ? "": `<span class="icon material-icons album-icon">album</span>` +m.subtitle}</i>
-                                                                        </span>
-                                                                        <span class="icon material-icons save-icon">save</span>
-                                                                        <!--<span class="icon material-icons s-icon">cloud</span>-->
-                                                                    </div>
-                                                                </li>`;
-                                            $('.music-list-ul').append($searchExtraHtml);
-                                        });
-                                        const promizeXX = Array.from(Array(parseInt($pages)+2)).map(function(x,idx) {
-                                            if(idx > 1 && idx < 12){
-                                                return fetch(PROXY+`https://www.jiosaavn.com/api.php?p=${idx}&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=40&__call=search.getResults`).then(res => res.json())
-                                            }
-                                        });
-                                        Promise.all(promizeXX).then(res => {
-                                            dataFiltered = res.filter(function( element ) {
-                                                return element !== undefined;
-                                            });
-                                            let AllSearchCombined = dataFiltered.reduce((acc, val) => acc = [...acc, ...val.results], [])
-                                            AllSearchCombined.map((mp,index)=>{
-                                                $searchExtraXHtml = `<li data-mediaUrl="${mp.id}" class="li-music online-music from-search"  data-mediatitle="${mp.title}">
-                                                                        <div class="item-title"><img class="s-img" src="${mp.image}" width="50px"/>
-                                                                            <span class="song-title">[${index}] ${mp.title} 
-                                                                                <i class="song-subs">${typeof(mp.subtitle) === undefined ? "": `<span class="icon material-icons album-icon">album</span>` +mp.subtitle}</i>
-                                                                            </span>
-                                                                            <span class="icon material-icons save-icon">save</span>
-                                                                            <!--<span class="icon material-icons s-icon">cloud</span>-->
-                                                                        </div>
-                                                                    </li>`;
-                                                $('.music-list-ul').append($searchExtraXHtml);
-                                            });
-                                        });
-                                        
-                                    }   
-                                });
+                                //@implemented on 24th apr 2024
+                                pageCounter = 1;
+                                resultCounter = 1;
+                                addMoreToSearchList(pageCounter,resultCounter,musicSearch);
                             }
                         });
                     } else {
@@ -1674,6 +1630,38 @@
             //         }
             //     },$thisXX);
             // }
+            function addMoreToSearchList(pageCounter,resultCounter,musicSearch){
+                //
+                //pageCounter = pageCounter+1
+                resultCounter = resultCounter+20;
+                console.log(pageCounter,resultCounter);
+                $.get(PROXY+`https://www.jiosaavn.com/api.php?p=${resultCounter}&q=${musicSearch}&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=${resultCounter}&__call=search.getResults`, (msX) => {
+                    $(searchEvt).text('cancel');
+                    $(searchEvt).removeClass('rotating');
+                    $('.search-row').addClass('search-expanded');
+                    mssX = JSON.parse(msX);
+                    $songsX = mssX.results;
+                    $songsX.forEach((song) => {
+                        songID = song.id;
+                        $searchHtml = `<li data-mediaUrl="${songID}" class="li-music online-music from-search"  data-mediatitle="${song.title}">
+                                            <div class="item-title"><img class="s-img" src="${song.image}" width="50px"/>
+                                                <span class="song-title">${song.title} 
+                                                    <i class="song-subs"><span class="icon material-icons album-icon">album</span>${song.subtitle} | ${song.more_info?.album}</i>
+                                                </span>
+                                                <span class="icon material-icons save-icon">save</span>
+                                                <!--<span class="icon material-icons s-icon">cloud</span>-->
+                                            </div>
+                                        </li>`;
+                        $('.music-list-ul').append($searchHtml);
+                    });
+                    //load more
+                    
+                    
+                    // if($songs.length > 0){
+                    //     addMoreToSearchList(pageCounter,resultCounter,musicSearch);
+                    // }
+                });
+            }
         </script>    
         <script class="Galib-Helpers" type="text/javascript">
             /* Helper Functions */
@@ -2037,6 +2025,7 @@
                 },
                 Start: ()=>{
                     $('.tutorial').show(2000);
+                    $('.main-search').val('');
                     T1 = setTimeout(()=>{
                         $('.cursorouter').css({'transform': 'translate(310px, 10px)'});
                     },2000);
@@ -2781,7 +2770,9 @@
     body::-webkit-scrollbar {
         display: none;
     }
-    
+    html::-webkit-scrollbar {
+        display: none;
+    }
     ul.saved-music-list-ul::-webkit-scrollbar {
         display: none;
     }
