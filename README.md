@@ -52,5 +52,7 @@ This is the most advanced music player as far as i have seen on the web!
 ![image](https://user-images.githubusercontent.com/17314236/182873340-c20ef944-d495-4e7d-8512-a97a6c4a1a17.png)
 
 
+If you want to contribute, then lets start with mobile responsiveness?
+
 
 
