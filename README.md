@@ -1,4 +1,4 @@
-Quick Usage : Just download the `Galib-MisicPlayer.html` and from file manager, open in chrome. No server needed!
+Quick Usage : Just download the `GalibMusicPlayer.html` and from file manager, open in chrome. No server needed!
 
 # G-Music
 G-Music pushes the limits of web audio player to extremes by using the Web Audio API and also comes with butter fluid animation/bvisualiser and next-gen playlist management system.
